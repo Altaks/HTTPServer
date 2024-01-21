@@ -1,0 +1,3 @@
+/home/altaks/Documents/dev/c/HTTPServer/cmake-build-debug/CMakeFiles/HTTPServer.dir
+/home/altaks/Documents/dev/c/HTTPServer/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/altaks/Documents/dev/c/HTTPServer/cmake-build-debug/CMakeFiles/rebuild_cache.dir
