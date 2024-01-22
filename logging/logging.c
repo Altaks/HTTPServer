@@ -38,12 +38,12 @@ void server_log(LogLevel logLevel, const char* message, ...) {
     switch (logLevel) {
         case FATAL:
         case ERROR:
-            fprintf(stderr, "[%02d/%02d/%d %02d:%02d:%02d] %s ", time->tm_mday, time->tm_mon + 1, time->tm_year + 1900, time->tm_hour, time->tm_min, time->tm_sec, logLevelstr);
+            fprintf(stderr, "[%02d/%02d/%d %02d:%02d:%02d] %s | ", time->tm_mday, time->tm_mon + 1, time->tm_year + 1900, time->tm_hour, time->tm_min, time->tm_sec, logLevelstr);
             vfprintf(stderr, message, args);
             fprintf(stderr, "\n");
             break;
         default:
-            printf("[%02d/%02d/%d %02d:%02d:%02d] %s ", time->tm_mday, time->tm_mon + 1, time->tm_year + 1900, time->tm_hour, time->tm_min, time->tm_sec, logLevelstr);
+            printf("[%02d/%02d/%d %02d:%02d:%02d] %s | ", time->tm_mday, time->tm_mon + 1, time->tm_year + 1900, time->tm_hour, time->tm_min, time->tm_sec, logLevelstr);
             vprintf(message, args);
             printf("\n");
             break;

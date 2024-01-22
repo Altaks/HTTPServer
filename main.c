@@ -102,7 +102,7 @@ const int TCP_STACK = 5;
             server_log(INFO, "Request GET received from connection %i", connection_id);
         }
         close(dialog_socket);
-        server_log(INFO, "Server connection %i with client on socket %i has been closed\n", connection_id, sock);
+        server_log(INFO, "Server connection %i with client on socket %i has been closed", connection_id, sock);
 
     }
 
