@@ -7,12 +7,19 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include "requests/requests.h"
 #include "logging/logging.h"
 
 const int TCP_STACK = 5;
 
-[[noreturn]] int main(int argc, char** argv) {
+void startServer(int argc, char** argv);
 
+int main(int argc, char** argv) {
+    requestFromStr("GET / HTTP/1.1");
+    return 0;
+}
+
+[[noreturn]] void startServer(int argc, char** argv){
     server_log(INFO, "Booting the server...");
 
     struct sockaddr_in server;
@@ -105,6 +112,4 @@ const int TCP_STACK = 5;
         server_log(INFO, "Server connection %i with client on socket %i has been closed", connection_id, sock);
 
     }
-
-    return 0;
 }
