@@ -93,7 +93,7 @@ const int TCP_STACK = 5;
                 exit(EXIT_FAILURE);
             } else if(bytes_received > 0){
                 strcat(request, buff_read);
-                if(strstr(request, "\n\n") || strstr(request, "\r\n\r\n")){
+                if(strstr(request, "\r\n\r\n") || strstr(request, "\n\n")){
                     break;
                 }
             }
