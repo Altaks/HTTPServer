@@ -94,5 +94,8 @@ HTTPRequest requestFromStr(char* str){
                httpVersionToStr(request.version)
     );
 
+    free(phrase);
+    free(token);
+
     return request;
 }
