@@ -12,6 +12,7 @@
 const int TCP_STACK = 5;
 
 [[noreturn]] int main(int argc, char** argv) {
+
     server_log(INFO, "Booting the server...");
 
     struct sockaddr_in server;
@@ -69,33 +70,41 @@ const int TCP_STACK = 5;
         server_log(INFO, "Successfully made the socket go in listen mode");
     }
 
+    int connection_id = 0;
+
     while(true){
         struct sockaddr_in client;
         socklen_t len = sizeof(client);
         int dialog_socket;
 
         dialog_socket = accept(sock, (struct sockaddr *) &client, &len);
+        connection_id++;
 
         char buff_read[1024];
         int buff_len = 1024;
 
-        ssize_t bytes_received = recv(dialog_socket, buff_read, buff_len, 0);
-        while(bytes_received > 0){
-            printf("%s", buff_read);
+        char request[] = "";
+
+        ssize_t bytes_received;
+        while(strlen(request) == 0 || bytes_received > 0) {
             bytes_received = recv(dialog_socket, buff_read, buff_len, 0);
-            if(bytes_received < 0){
+            if(bytes_received < 0) {
                 server_log(ERROR, "An error occurred while reading bytes from connection : %s", strerror(errno));
+                exit(EXIT_FAILURE);
+            } else if(bytes_received > 0){
+                strcat(request, buff_read);
+                if(strstr(request, "\n\n") || strstr(request, "\r\n\r\n")){
+                    break;
+                }
             }
         }
-
+        if(strstr(request, "GET")) {
+            server_log(INFO, "Request GET received from connection %i", connection_id);
+        }
         close(dialog_socket);
+        server_log(INFO, "Server connection %i with client on socket %i has been closed\n", connection_id, sock);
 
     }
-    /*
-    server_log(INFO, "Closing server socket with file descriptor %i", sock);
-    close(sock);
-    server_log(INFO, "Server socket with file descriptor %i closed", sock);
-    */
 
     return 0;
 }
