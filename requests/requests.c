@@ -102,13 +102,5 @@ HTTPCommand requestFromStr(char* str) {
     }
 
     free(phrase);
-
-    server_log(INFO,
-               "Request parsed as [method: %s, path: %s, version: %s]",
-               requestTypeToStr(request.type),
-               request.path,
-               httpVersionToStr(request.version)
-    );
-
     return request;
 }

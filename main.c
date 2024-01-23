@@ -9,6 +9,7 @@
 
 #include "requests/requests.h"
 #include "logging/logging.h"
+#include "network/address.h"
 
 const int TCP_STACK = 5;
 
@@ -54,17 +55,7 @@ int main(int argc, char** argv) {
         server_log(FATAL, "Could not bind server address [port:%i] to socket %i due to error : %s", port, sock, strerror(errno));
         exit(EXIT_FAILURE);
     } else {
-
-        char addr[INET6_ADDRSTRLEN > INET_ADDRSTRLEN ? INET6_ADDRSTRLEN : INET_ADDRSTRLEN];
-
-        switch (((struct sockaddr *) &server)->sa_family) {
-            case AF_INET: {
-                inet_ntop(AF_INET, &(server.sin_addr), addr, INET_ADDRSTRLEN);
-            }
-            case AF_INET6: {
-                inet_ntop(AF_INET6, &((struct sockaddr_in6 *) &server)->sin6_addr, addr, INET6_ADDRSTRLEN);
-            }
-        }
+        char * addr = addressToString(server);
         server_log(INFO, "Successfully bound server address [addr: %s w/ port %i] to socket %i", addr, ntohs(server.sin_port), sock);
     }
 
@@ -113,7 +104,10 @@ int main(int argc, char** argv) {
 
             char* req_head = strtok(request_cpy, "\r\n");
             strcat(req_head, "\0");
-            requestFromStr(req_head);
+
+            HTTPCommand command = requestFromStr(req_head);
+
+            server_log(INFO, "Request command parsed as [method: %s, path: %s, version: %s]", requestTypeToStr(command.type), command.path, httpVersionToStr(command.version));
 
             free(request_cpy);
         }
