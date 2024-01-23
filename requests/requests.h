@@ -31,8 +31,8 @@ enum HTTPVersion {
 /**
  *  Represents a HTTP request
  */
-typedef struct HTTPRequest HTTPRequest;
-struct HTTPRequest {
+typedef struct HTTPCommand HTTPCommand;
+struct HTTPCommand {
     RequestType type;
     char * path;
     HTTPVersion version;
@@ -67,8 +67,8 @@ char* httpVersionToStr(HTTPVersion version);
 HTTPVersion httpVersionFromStr(char* str);
 
 /**
- * Converts a string to a HTTP request
+ * Converts a string to a HTTP command
  * @param str the string to convert
- * @return the HTTP request corresponding to the string
+ * @return the HTTP command corresponding to the string
  */
-HTTPRequest requestFromStr(char* str);
+HTTPCommand requestFromStr(char* str);

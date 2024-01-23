@@ -59,10 +59,10 @@ HTTPVersion httpVersionFromStr(char* str){
     return -1;
 }
 
-HTTPRequest requestFromStr(char* str) {
+HTTPCommand requestFromStr(char* str) {
 
     // Creating empty request data
-    HTTPRequest request = {0};
+    HTTPCommand request = {0};
 
     server_log(INFO, "Obtained request header of length : %i", strlen(str));
 
