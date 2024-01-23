@@ -107,7 +107,12 @@ int main(int argc, char** argv) {
 
             HTTPCommand command = requestFromStr(req_head);
 
-            server_log(INFO, "Request command parsed as [method: %s, path: %s, version: %s]", requestTypeToStr(command.type), command.path, httpVersionToStr(command.version));
+            server_log(INFO, "Request command parsed as [method: %s, path: %s, version: %s] from [address: %s, port: %i]",
+                       requestTypeToStr(command.type),
+                       command.path,
+                       httpVersionToStr(command.version),
+                       addressToString(client),
+                       ntohs(client.sin_port));
 
             free(request_cpy);
         }
