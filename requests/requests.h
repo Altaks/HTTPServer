@@ -21,6 +21,7 @@ enum RequestType {
  */
 typedef enum HTTPVersion HTTPVersion;
 enum HTTPVersion {
+    HTTP0_9,
     HTTP1,
     HTTP1_1,
 
@@ -49,7 +50,7 @@ char* requestTypeToStr(RequestType requestType);
  * @param str the string to convert
  * @return the request type corresponding to the string
  */
-HTTPVersion requestTypeFromStr(char* str);
+RequestType requestTypeFromStr(char* str);
 
 /**
  * Converts a HTTP version to a string

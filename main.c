@@ -15,7 +15,7 @@ const int TCP_STACK = 5;
 void startServer(int argc, char** argv);
 
 int main(int argc, char** argv) {
-    requestFromStr("GET / HTTP/1.1");
+    startServer(argc, argv);
     return 0;
 }
 
@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
         char buff_read[1024];
         int buff_len = 1024;
 
-        char request[] = "";
+        char * request = malloc(sizeof(char) * 1024);
 
         ssize_t bytes_received;
         while(strlen(request) == 0 || bytes_received > 0) {
@@ -99,15 +99,25 @@ int main(int argc, char** argv) {
                 server_log(ERROR, "An error occurred while reading bytes from connection : %s", strerror(errno));
                 exit(EXIT_FAILURE);
             } else if(bytes_received > 0){
+                request = realloc(request, strlen(request) + strlen(buff_read) + 1);
                 strcat(request, buff_read);
                 if(strstr(request, "\r\n\r\n") || strstr(request, "\n\n")){
                     break;
                 }
             }
         }
-        if(strstr(request, "GET")) {
-            server_log(INFO, "Request GET received from connection %i", connection_id);
+
+        if(strlen(request) > 0) {
+            char* request_cpy = malloc(strlen(request) + 1);
+            strcpy(request_cpy, request);
+
+            char* req_head = strtok(request_cpy, "\r\n");
+            strcat(req_head, "\0");
+            requestFromStr(req_head);
+
+            free(request_cpy);
         }
+
         close(dialog_socket);
         server_log(INFO, "Server connection %i with client on socket %i has been closed", connection_id, sock);
 
