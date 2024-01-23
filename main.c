@@ -76,6 +76,7 @@ int main(int argc, char** argv) {
         int dialog_socket;
 
         dialog_socket = accept(sock, (struct sockaddr *) &client, &len);
+        char* client_addr = addressToString(client);
         connection_id++;
 
         char buff_read[1024];
@@ -89,7 +90,7 @@ int main(int argc, char** argv) {
             if(bytes_received < 0) {
                 server_log(ERROR, "An error occurred while reading bytes from connection : %s", strerror(errno));
                 exit(EXIT_FAILURE);
-            } else if(bytes_received > 0){
+            } else if(bytes_received > 0 && request != NULL){
                 request = realloc(request, strlen(request) + strlen(buff_read) + 1);
                 strcat(request, buff_read);
                 if(strstr(request, "\r\n\r\n") || strstr(request, "\n\n")){
@@ -103,22 +104,20 @@ int main(int argc, char** argv) {
             strcpy(request_cpy, request);
 
             char* req_head = strtok(request_cpy, "\r\n");
-            strcat(req_head, "\0");
 
             HTTPCommand command = requestFromStr(req_head);
+            free(request_cpy);
 
             server_log(INFO, "Request command parsed as [method: %s, path: %s, version: %s] from [address: %s, port: %i]",
                        requestTypeToStr(command.type),
                        command.path,
                        httpVersionToStr(command.version),
-                       addressToString(client),
+                       client_addr,
                        ntohs(client.sin_port));
-
-            free(request_cpy);
         }
 
         close(dialog_socket);
         server_log(INFO, "Server connection %i with client on socket %i has been closed", connection_id, sock);
-
+        free(client_addr);
     }
 }
