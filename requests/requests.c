@@ -85,7 +85,8 @@ HTTPCommand requestFromStr(char* str) {
                 break;
             case 1:
                 // Path of the request
-                request.path = token;
+                request.path = malloc(sizeof(char) * strlen(token));
+                strcpy(request.path, token);
                 break;
             case 2:
                 // HTTP version of the request
@@ -100,14 +101,14 @@ HTTPCommand requestFromStr(char* str) {
         token_index++;
     }
 
+    free(phrase);
+
     server_log(INFO,
                "Request parsed as [method: %s, path: %s, version: %s]",
                requestTypeToStr(request.type),
                request.path,
                httpVersionToStr(request.version)
     );
-
-    free(phrase);
 
     return request;
 }
