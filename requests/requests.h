@@ -39,6 +39,28 @@ struct HTTPCommand {
 };
 
 /**
+ * Represents a HTTP header
+ */
+typedef struct HTTPHeader HTTPHeader;
+struct HTTPHeader {
+    char * key;
+    char * value;
+};
+
+/**
+ * Represents a HTTP request
+ */
+typedef struct HTTPRequest HTTPRequest;
+struct HTTPRequest {
+    HTTPCommand command;
+
+    HTTPHeader * headers;
+    int headers_count;
+
+    char * body;
+};
+
+/**
  * Converts a request type to a string
  * @param requestType the request type to convert
  * @return the string corresponding to the request type
@@ -71,4 +93,32 @@ HTTPVersion httpVersionFromStr(char* str);
  * @param str the string to convert
  * @return the HTTP command corresponding to the string
  */
-HTTPCommand requestFromStr(char* str);
+HTTPCommand commandFromStr(char* str);
+
+/**
+ * Converts a HTTP header to a string
+ * @param header the HTTP header to convert
+ * @return the string corresponding to the HTTP header
+ */
+char* headerToStr(HTTPHeader header);
+
+/**
+ * Converts a string to a HTTP header
+ * @param str the string to convert
+ * @return the HTTP header corresponding to the string
+ */
+HTTPHeader headerFromStr(char* str);
+
+/**
+ * Converts a HTTP request to a string
+ * @param request the HTTP request to convert
+ * @return the string corresponding to the HTTP request
+ */
+char* requestToStr(HTTPRequest request);
+
+/**
+ * Converts a string to a HTTP request
+ * @param str the string to convert
+ * @return the HTTP request corresponding to the string
+ */
+HTTPRequest requestFromStr(char* str);

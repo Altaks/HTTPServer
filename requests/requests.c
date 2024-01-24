@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "requests.h"
 #include "../logging/logging.h"
 
@@ -59,7 +60,7 @@ HTTPVersion httpVersionFromStr(char* str){
     return -1;
 }
 
-HTTPCommand requestFromStr(char* str) {
+HTTPCommand commandFromStr(char* str) {
 
     // Creating empty request data
     HTTPCommand request = {0};
@@ -103,4 +104,92 @@ HTTPCommand requestFromStr(char* str) {
 
     free(phrase);
     return request;
+}
+
+
+char* headerToStr(HTTPHeader header) {
+    char * str = malloc(sizeof(char) * (strlen(header.key) + strlen(header.value) + 4));
+    sprintf(str, "%s: %s", header.key, header.value);
+    return str;
+}
+
+
+HTTPHeader headerFromStr(char* str) {
+    HTTPHeader header = {0};
+
+    char * phrase = malloc(strlen(str));
+    strcpy(phrase, str);
+
+    char * token = strtok(phrase, ": ");
+    int8_t token_index = 0;
+
+    while(token != NULL){
+        switch (token_index) {
+            case 0:
+                header.key = malloc(sizeof(char) * strlen(token));
+                strcpy(header.key, token);
+                break;
+            case 1:
+                header.value = malloc(sizeof(char) * strlen(token));
+                strcpy(header.value, token);
+                break;
+            default:
+                continue;
+        }
+
+        token = strtok(NULL, ": ");
+        token_index++;
+    }
+
+    free(phrase);
+    return header;
+}
+
+
+char* requestToStr(HTTPRequest request) {
+    char * req = malloc(
+            sizeof(char) * (
+                strlen(requestTypeToStr(request.command.type)) +
+                strlen(request.command.path) +
+                strlen(httpVersionToStr(request.command.version)) +
+                2 // for two spaces
+           )
+    );
+
+    strcat(req, requestTypeToStr(request.command.type));
+    strcat(req, " ");
+    strcat(req, request.command.path);
+    strcat(req, " ");
+    strcat(req, httpVersionToStr(request.command.version));
+
+    return req;
+}
+
+/*
+    // char * req2 = "GET /page.html HTTP/1.0\r\n"
+                 "Host: example.com\r\n"
+                 "Referer: http://example.com/\r\n"
+                 "User-Agent: CERN-LineMode/2.15 libwww/2.17b3";
+ */
+
+HTTPRequest requestFromStr(char* str) {
+    char * req_cpy = malloc(strlen(str));
+    strcpy(req_cpy, str);
+
+    char * delimiter = (strstr(str, "\r\n\r\n") != NULL) ? "\r\n\r\n" : "\n\n";
+
+    char * req_segment = strtok(req_cpy, delimiter);
+
+    char * req_head = malloc(strlen(req_segment));
+    strcpy(req_head, req_segment);
+
+    req_segment = strtok(NULL, delimiter);
+    char * req_body = malloc(strlen(req_segment));
+    strcpy(req_body, req_segment);
+
+    server_log(INFO, "Server head detected as %s and body as %s", req_head, req_body);
+
+    free(req_head);
+    free(req_body);
+    free(req_cpy);
 }

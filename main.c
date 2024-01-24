@@ -16,7 +16,29 @@ const int TCP_STACK = 5;
 void startServer(int argc, char** argv);
 
 int main(int argc, char** argv) {
+
+    /*
+     * 
+    HTTPRequest req = {0};
+
+    req.command.type = GET;
+    req.command.path = "/";
+    req.command.version = HTTP1;
+
+    char * req2 = "GET /page.html HTTP/1.0\r\n"
+                  "Host: example.com\r\n"
+                  "Referer: http://example.com/\r\n"
+                  "User-Agent: CERN-LineMode/2.15 libwww/2.17b3\r\n"
+                  "\r\n"
+                  "Request body is absolutely weird\r\n"
+                  "\r\n"
+                  "\r\n";
+
+    requestFromStr(req2);
+    */
+
     startServer(argc, argv);
+
     return 0;
 }
 
@@ -82,17 +104,25 @@ int main(int argc, char** argv) {
         char buff_read[1024];
         int buff_len = 1024;
 
-        char * request = malloc(sizeof(char) * 1024);
+        char * request = NULL;
 
-        ssize_t bytes_received;
-        while(strlen(request) == 0 || bytes_received > 0) {
+        ssize_t bytes_received = 0;
+        while(request == NULL || bytes_received > 0) {
             bytes_received = recv(dialog_socket, buff_read, buff_len, 0);
             if(bytes_received < 0) {
                 server_log(ERROR, "An error occurred while reading bytes from connection : %s", strerror(errno));
                 exit(EXIT_FAILURE);
-            } else if(bytes_received > 0 && request != NULL){
-                request = realloc(request, strlen(request) + strlen(buff_read) + 1);
-                strcat(request, buff_read);
+            } else if(bytes_received > 0){
+                if(request == NULL) {
+                    request = malloc(sizeof(char) * bytes_received);
+                    strcpy(request, buff_read);
+                } else {
+                    request = realloc(request, strlen(request) + strlen(buff_read) + 1);
+                    if(request == NULL){
+                        printf("Reallocation of buffer at address %p as failed during expanding resources expansion", request);
+                    }
+                    strcat(request, buff_read);
+                }
                 if(strstr(request, "\r\n\r\n") || strstr(request, "\n\n")){
                     break;
                 }
@@ -105,7 +135,7 @@ int main(int argc, char** argv) {
 
             char* req_head = strtok(request_cpy, "\r\n");
 
-            HTTPCommand command = requestFromStr(req_head);
+            HTTPCommand command = commandFromStr(req_head);
             free(request_cpy);
 
             server_log(INFO, "Request command parsed as [method: %s, path: %s, version: %s] from [address: %s, port: %i]",
@@ -117,7 +147,10 @@ int main(int argc, char** argv) {
         }
 
         close(dialog_socket);
-        server_log(INFO, "Server connection %i with client on socket %i has been closed", connection_id, sock);
-        free(client_addr);
+
+        if(client_addr != NULL) free(client_addr);
+        if(request     != NULL) free(request);
+
+        server_log(INFO, "Server connection %i with client on socket %i has been closed and resources have been freed", connection_id, sock);
     }
 }
