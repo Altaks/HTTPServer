@@ -173,23 +173,30 @@ char* requestToStr(HTTPRequest request) {
  */
 
 HTTPRequest requestFromStr(char* str) {
-    char * req_cpy = malloc(strlen(str));
+    char * req_cpy = malloc(strlen(str) + 1);
     strcpy(req_cpy, str);
+    char * curr_req_pos = req_cpy;
 
     char * delimiter = (strstr(str, "\r\n\r\n") != NULL) ? "\r\n\r\n" : "\n\n";
 
-    char * req_segment = strtok(req_cpy, delimiter);
+    server_log(INFO, "Request curr ptr is at %p", curr_req_pos);
 
-    char * req_head = malloc(strlen(req_segment));
-    strcpy(req_head, req_segment);
+    long req_head_size = strstr(curr_req_pos, delimiter) - curr_req_pos;
+    char * req_head = malloc(sizeof(char) * req_head_size + 1);
+    strncpy(req_head, curr_req_pos, req_head_size);
+    curr_req_pos += (sizeof(char) * req_head_size) + strlen(delimiter);
 
-    req_segment = strtok(NULL, delimiter);
-    char * req_body = malloc(strlen(req_segment));
-    strcpy(req_body, req_segment);
+    server_log(INFO, "Request header has been determined as %s", req_head);
 
-    server_log(INFO, "Server head detected as %s and body as %s", req_head, req_body);
+    // If request has a body
+    if(strstr(curr_req_pos, delimiter)){
+        long req_body_size = strstr(curr_req_pos, delimiter) - curr_req_pos;
+        char * req_body = malloc(sizeof(char) * req_head_size  + 1);
+        strncpy(req_body, curr_req_pos, req_body_size);
+        curr_req_pos += (sizeof(char) * req_body_size) + strlen(delimiter);
 
-    free(req_head);
-    free(req_body);
+        server_log(INFO, "Request body has been determined as %s", req_body);
+    }
+
     free(req_cpy);
 }

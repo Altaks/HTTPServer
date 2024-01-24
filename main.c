@@ -17,27 +17,18 @@ void startServer(int argc, char** argv);
 
 int main(int argc, char** argv) {
 
-    /*
-     * 
     HTTPRequest req = {0};
 
     req.command.type = GET;
     req.command.path = "/";
     req.command.version = HTTP1;
 
-    char * req2 = "GET /page.html HTTP/1.0\r\n"
-                  "Host: example.com\r\n"
-                  "Referer: http://example.com/\r\n"
-                  "User-Agent: CERN-LineMode/2.15 libwww/2.17b3\r\n"
-                  "\r\n"
-                  "Request body is absolutely weird\r\n"
-                  "\r\n"
-                  "\r\n";
+    char * req2 = "GET / HTTP/1.1\r\nHost: 127.0.0.1:8080\r\nConnection: keep-alive\r\nCache-Control: max-age=0\r\nsec-ch-ua: \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"\r\nsec-ch-ua-mobile: ?0\r\nsec-ch-ua-platform: \"Linux\"\r\nDNT: 1\r\nUpgrade-Insecure-Requests: 1\r\nUser-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7\r\nSec-Fetch-Site: none\r\nSec-Fetch-Mode: navigate\r\nSec-Fetch-User: ?1\r\nSec-Fetch-Dest: document\r\nAccept-Encoding: gzip, deflate, br\r\nAccept-Language: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7\r\n\r\nBody of the request\r\n\r\n";
 
     requestFromStr(req2);
-    */
 
-    startServer(argc, argv);
+
+    // startServer(argc, argv);
 
     return 0;
 }
