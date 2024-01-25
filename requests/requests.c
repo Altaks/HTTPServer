@@ -177,9 +177,7 @@ HTTPRequest requestFromStr(char* str) {
     strcpy(req_cpy, str);
     char * curr_req_pos = req_cpy;
 
-    char * delimiter = (strstr(str, "\r\n\r\n") != NULL) ? "\r\n\r\n" : "\n\n";
-
-    server_log(INFO, "Request curr ptr is at %p", curr_req_pos);
+    const char * delimiter = (strstr(str, "\r\n\r\n") != NULL) ? "\r\n\r\n" : "\n\n";
 
     long req_head_size = strstr(curr_req_pos, delimiter) - curr_req_pos;
     char * req_head = malloc(sizeof(char) * req_head_size + 1);
@@ -188,10 +186,12 @@ HTTPRequest requestFromStr(char* str) {
 
     server_log(INFO, "Request header has been determined as %s", req_head);
 
+    char * req_body = NULL;
+
     // If request has a body
     if(strstr(curr_req_pos, delimiter)){
         long req_body_size = strstr(curr_req_pos, delimiter) - curr_req_pos;
-        char * req_body = malloc(sizeof(char) * req_head_size  + 1);
+        req_body = malloc(sizeof(char) * req_head_size  + 1);
         strncpy(req_body, curr_req_pos, req_body_size);
         curr_req_pos += (sizeof(char) * req_body_size) + strlen(delimiter);
 
@@ -199,4 +199,45 @@ HTTPRequest requestFromStr(char* str) {
     }
 
     free(req_cpy);
+
+    const char * line_delimiter = (strstr(req_head, "\r\n") != NULL) ? "\r\n" : "\n";
+
+    // -------------------- REQ_COMMAND TREATMENT --------------------
+
+    char * req_head_pos = req_head;
+
+    long req_command_size = strstr(req_head_pos, line_delimiter) - req_head_pos;
+    char * req_command = malloc(sizeof(char) * req_command_size + 1);
+    strncpy(req_command, req_head_pos, req_command_size);
+
+    // Move ptr after the first line
+    req_head_pos += req_command_size + strlen(line_delimiter);
+
+    server_log(INFO, "Request command determined as %s", req_command);
+
+
+    // -------------------- REQ_HEAD TREATMENT --------------------
+
+    HTTPHeader * headers = NULL;
+    int headers_count = 0;
+
+    while(strstr(req_head_pos, line_delimiter) != NULL) {
+        long req_header_size = strstr(req_head_pos, line_delimiter) - req_head_pos;
+        char* req_header = malloc(sizeof(char) * req_header_size + 1);
+        strncpy(req_header, req_head_pos, req_header_size);
+        req_head_pos += req_header_size + strlen(line_delimiter);
+
+        server_log(INFO, "Found header : %s", req_header);
+        free(req_header);
+    }
+
+    // -------------------- REQ_BODY TREATMENT --------------------
+
+    if(req_body != NULL){
+
+    }
+
+    // -------------------- MEMORY CLEANING --------------------
+
+    free(req_head);
 }
