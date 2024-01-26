@@ -117,21 +117,21 @@ char* headerToStr(HTTPHeader header) {
 HTTPHeader headerFromStr(char* str) {
     HTTPHeader header = {0};
 
-    char * phrase = malloc(strlen(str) + 1);
+    char * phrase = calloc(strlen(str) + 1, sizeof(char));
     strcpy(phrase, str);
 
     const char * delimiter = ": ";
     char * phrase_pos = phrase;
 
     long prefix_len = strstr(phrase, delimiter) - phrase;
-    char * prefix = malloc(sizeof(char) * prefix_len);
+    char * prefix = calloc( prefix_len + 1, sizeof(char));
     strncpy(prefix, phrase, prefix_len);
     phrase_pos += prefix_len + strlen(delimiter);
 
     header.key = prefix;
 
     long content_len = strlen(str) - prefix_len - strlen(delimiter);
-    char * content = malloc(sizeof(char) * content_len);
+    char * content = calloc( content_len + 1, sizeof(char));
     strncpy(content, phrase_pos, content_len);
 
     header.value = content;
@@ -232,9 +232,15 @@ HTTPRequest requestFromStr(char* str) {
             headers_allocated += 5;
         }
 
+        server_log(INFO, "Found header to parse : %s", req_header);
         headers[headers_count++] = headerFromStr(req_header);
-        server_log(INFO, "Found header : %s", req_header);
         free(req_header);
+    }
+
+    server_log(INFO, "Parsed %i headers", headers_count);
+
+    for(int i = 0; i < headers_count; i++){
+        server_log(INFO, "%i'th header : %s", i, headerToStr(headers[i]));
     }
 
     // -------------------- REQ_BODY TREATMENT --------------------
