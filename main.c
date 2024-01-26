@@ -10,6 +10,7 @@
 #include "requests/requests.h"
 #include "logging/logging.h"
 #include "network/address.h"
+#include "files/files.h"
 
 const int TCP_STACK = 5;
 
@@ -62,9 +63,17 @@ int main(int argc, char** argv) {
 
     // server_log(INFO, "Header %s parsed as %s", header, headerToStr(headerFromStr(header)));
 
-    requestFromStr(req2);
+    // requestFromStr(req2);
 
     // startServer(argc, argv);
+
+    int fd = openFile("/home/altaks/Documents/dev/c/HTTPServer/", "README.md");
+    char *text = NULL;
+    ssize_t text_length;
+    readFile(fd, &text, &text_length);
+    closeFile(fd);
+
+    server_log(INFO, "Read content of size %i from file : %s", text_length, text);
 
     return 0;
 }

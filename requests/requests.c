@@ -142,22 +142,7 @@ HTTPHeader headerFromStr(char* str) {
 
 
 char* requestToStr(HTTPRequest request) {
-    char * req = malloc(
-            sizeof(char) * (
-                strlen(requestTypeToStr(request.command.type)) +
-                strlen(request.command.path) +
-                strlen(httpVersionToStr(request.command.version)) +
-                2 // for two spaces
-           )
-    );
-
-    strcat(req, requestTypeToStr(request.command.type));
-    strcat(req, " ");
-    strcat(req, request.command.path);
-    strcat(req, " ");
-    strcat(req, httpVersionToStr(request.command.version));
-
-    return req;
+    return "Not implemented yet";
 }
 
 /*

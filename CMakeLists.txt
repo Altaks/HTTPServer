@@ -7,4 +7,6 @@ add_executable(HTTPServer main.c
         logging/logging.c
         logging/logging.h
         requests/requests.c
-        network/address.c)
+        network/address.c
+        files/files.h
+        files/files.c)
