@@ -137,8 +137,8 @@ int main(int argc, char** argv) {
         char* client_addr = addressToString(client);
         connection_id++;
 
-        char buff_read[1024];
-        int buff_len = 1024;
+        ushort buff_len = 1024;
+        char buff_read[buff_len];
 
         char * request = NULL;
 
