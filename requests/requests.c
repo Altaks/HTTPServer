@@ -117,29 +117,24 @@ char* headerToStr(HTTPHeader header) {
 HTTPHeader headerFromStr(char* str) {
     HTTPHeader header = {0};
 
-    char * phrase = malloc(strlen(str));
+    char * phrase = malloc(strlen(str) + 1);
     strcpy(phrase, str);
 
-    char * token = strtok(phrase, ": ");
-    int8_t token_index = 0;
+    const char * delimiter = ": ";
+    char * phrase_pos = phrase;
 
-    while(token != NULL){
-        switch (token_index) {
-            case 0:
-                header.key = malloc(sizeof(char) * strlen(token));
-                strcpy(header.key, token);
-                break;
-            case 1:
-                header.value = malloc(sizeof(char) * strlen(token));
-                strcpy(header.value, token);
-                break;
-            default:
-                continue;
-        }
+    long prefix_len = strstr(phrase, delimiter) - phrase;
+    char * prefix = malloc(sizeof(char) * prefix_len);
+    strncpy(prefix, phrase, prefix_len);
+    phrase_pos += prefix_len + strlen(delimiter);
 
-        token = strtok(NULL, ": ");
-        token_index++;
-    }
+    header.key = prefix;
+
+    long content_len = strlen(str) - prefix_len - strlen(delimiter);
+    char * content = malloc(sizeof(char) * content_len);
+    strncpy(content, phrase_pos, content_len);
+
+    header.value = content;
 
     free(phrase);
     return header;
@@ -220,13 +215,24 @@ HTTPRequest requestFromStr(char* str) {
 
     HTTPHeader * headers = NULL;
     int headers_count = 0;
+    int headers_allocated = 0;
 
     while(strstr(req_head_pos, line_delimiter) != NULL) {
         long req_header_size = strstr(req_head_pos, line_delimiter) - req_head_pos;
         char* req_header = malloc(sizeof(char) * req_header_size + 1);
+        memset(req_header, '\0', req_header_size + 1);
         strncpy(req_header, req_head_pos, req_header_size);
         req_head_pos += req_header_size + strlen(line_delimiter);
 
+        if(headers == NULL){
+            headers = malloc(sizeof(HTTPHeader) * 5);
+            headers_allocated = 5;
+        } else if(headers_allocated >= headers_count) {
+            headers = realloc(headers, sizeof(HTTPHeader) * (headers_count + 5));
+            headers_allocated += 5;
+        }
+
+        headers[headers_count++] = headerFromStr(req_header);
         server_log(INFO, "Found header : %s", req_header);
         free(req_header);
     }
