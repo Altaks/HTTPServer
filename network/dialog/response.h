@@ -105,5 +105,13 @@ char* HTTPResponseCodeToStr(HTTPResponseCode code);
 
 typedef struct HTTPResponse HTTPResponse;
 struct HTTPResponse {
-
+    HTTPResponseCode code;
+    char * date;
+    char * server;
+    char * contentType;
+    char * expires;
+    char * lastModified;
+    char * body;
 };
+
+char* responseToStr(HTTPResponse response);

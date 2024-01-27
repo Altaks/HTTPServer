@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "requests/requests.h"
+#include "network/dialog//requests.h"
 #include "logging/logging.h"
 #include "network/address.h"
 #include "files/files.h"
