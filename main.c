@@ -40,7 +40,11 @@ int main(int argc, char** argv) {
                   "Sec-Fetch-User: ?1\r\n"
                   "Sec-Fetch-Dest: document\r\n"
                   "Accept-Encoding: gzip, deflate, br\r\n"
-                  "Accept-Language: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7\r\n\r\n";
+                  "Accept-Language: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7\r\n"
+                  "\r\n"
+                  "Request body is here :3\r\n"
+                  "\r\n"
+                  "\r\n";
 
     char * req3 = "GET / HTTP/1.1\r\n"
                   "Host: 127.0.0.1:8080\r\n"
@@ -63,7 +67,7 @@ int main(int argc, char** argv) {
 
     // server_log(INFO, "Header %s parsed as %s", header, headerToStr(headerFromStr(header)));
 
-    // requestFromStr(req2);
+    requestFromStr(req2);
 
     // startServer(argc, argv);
 

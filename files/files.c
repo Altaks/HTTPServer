@@ -1,7 +1,6 @@
 #include <string.h>
 #include <stdbool.h>
 #include <fcntl.h>
-#include <errno.h>
 #include <unistd.h>
 
 #include "files.h"

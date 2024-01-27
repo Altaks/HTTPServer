@@ -86,7 +86,7 @@ HTTPCommand commandFromStr(char* str) {
                 break;
             case 1:
                 // Path of the request
-                request.path = malloc(sizeof(char) * strlen(token));
+                request.path = malloc(sizeof(char) * strlen(token) + 1);
                 strcpy(request.path, token);
                 break;
             case 2:
@@ -145,13 +145,6 @@ char* requestToStr(HTTPRequest request) {
     return "Not implemented yet";
 }
 
-/*
-    // char * req2 = "GET /page.html HTTP/1.0\r\n"
-                 "Host: example.com\r\n"
-                 "Referer: http://example.com/\r\n"
-                 "User-Agent: CERN-LineMode/2.15 libwww/2.17b3";
- */
-
 HTTPRequest requestFromStr(char* str) {
     char * req_cpy = malloc(strlen(str) + 1);
     strcpy(req_cpy, str);
@@ -171,7 +164,7 @@ HTTPRequest requestFromStr(char* str) {
     // If request has a body
     if(strstr(curr_req_pos, delimiter)){
         long req_body_size = strstr(curr_req_pos, delimiter) - curr_req_pos;
-        req_body = malloc(sizeof(char) * req_head_size  + 1);
+        req_body = malloc(sizeof(char) * req_head_size + 1);
         strncpy(req_body, curr_req_pos, req_body_size);
         curr_req_pos += (sizeof(char) * req_body_size) + strlen(delimiter);
 
@@ -181,6 +174,10 @@ HTTPRequest requestFromStr(char* str) {
     free(req_cpy);
 
     const char * line_delimiter = (strstr(req_head, "\r\n") != NULL) ? "\r\n" : "\n";
+
+    // -------------------- REQUEST PROCESSING BEGIN -----------------------
+
+    HTTPRequest request = {0};
 
     // -------------------- REQ_COMMAND TREATMENT --------------------
 
@@ -195,6 +192,8 @@ HTTPRequest requestFromStr(char* str) {
 
     server_log(INFO, "Request command determined as %s", req_command);
 
+    request.command = commandFromStr(req_command);
+    free(req_command);
 
     // -------------------- REQ_HEAD TREATMENT --------------------
 
@@ -222,16 +221,18 @@ HTTPRequest requestFromStr(char* str) {
         free(req_header);
     }
 
-    server_log(INFO, "Parsed %i headers", headers_count);
-
     for(int i = 0; i < headers_count; i++){
         server_log(INFO, "%i'th header : %s", i, headerToStr(headers[i]));
     }
 
+    request.headers = headers;
+    request.headers_count = headers_count;
+
     // -------------------- REQ_BODY TREATMENT --------------------
 
     if(req_body != NULL){
-
+        request.body = req_body;
+        server_log(INFO, "Request body is %s", request.body);
     }
 
     // -------------------- MEMORY CLEANING --------------------
