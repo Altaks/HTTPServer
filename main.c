@@ -71,13 +71,14 @@ int main(int argc, char** argv) {
 
     // startServer(argc, argv);
 
+    /*
     int fd = openFile("/home/altaks/Documents/dev/c/HTTPServer/", "README.md");
     char *text = NULL;
     ssize_t text_length;
     readFile(fd, &text, &text_length);
     closeFile(fd);
-
     server_log(INFO, "Read content of size %i from file : %s", text_length, text);
+     */
 
     return 0;
 }

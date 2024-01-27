@@ -6,9 +6,10 @@ set(CMAKE_C_STANDARD 23)
 add_executable(HTTPServer main.c
         logging/logging.c
         logging/logging.h
-        requests/requests.h
-        requests/requests.c
+        network/dialog/requests.h
+        network/dialog/requests.c
         network/address.h
         network/address.c
         files/files.h
-        files/files.c)
+        files/files.c
+        network/dialog/response.c)

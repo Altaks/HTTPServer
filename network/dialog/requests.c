@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "requests.h"
-#include "../logging/logging.h"
+#include "../../logging/logging.h"
 
 char* requestTypeToStr(RequestType requestType) {
     switch (requestType) {
