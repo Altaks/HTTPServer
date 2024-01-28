@@ -1,3 +1,6 @@
+#ifndef RESPONSE_H_
+#define RESPONSE_H_
+
 #include "requests.h"
 
 typedef enum HTTPResponseCode HTTPResponseCode;
@@ -128,3 +131,5 @@ struct HTTPResponse {
 HTTPResponse buildResponse(char * rootDirectory, char * request_txt);
 
 char* responseToStr(HTTPResponse response);
+
+#endif

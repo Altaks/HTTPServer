@@ -1,3 +1,6 @@
+#ifndef REQUESTS_H_
+#define REQUESTS_H_
+
 /**
  * Represents a HTTP request type
  */
@@ -123,3 +126,5 @@ char* requestToStr(HTTPRequest request);
  * @return the HTTP request corresponding to the string
  */
 HTTPRequest requestFromStr(char* str);
+
+#endif

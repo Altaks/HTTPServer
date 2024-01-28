@@ -15,4 +15,6 @@ add_executable(HTTPServer main.c
         network/dialog/response.c
         util/date.c
         util/date.h
+        util/date/hashmap.c
+        util/date/hashmap.h
 )

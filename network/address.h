@@ -1,3 +1,6 @@
+#ifndef ADDRESS_H
+#define ADDRESS_H
+
 #include <arpa/inet.h>
 
 /**
@@ -6,3 +9,5 @@
  * @return the string corresponding to the address
  */
 char* addressToString(struct sockaddr_in address);
+
+#endif

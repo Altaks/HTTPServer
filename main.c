@@ -6,13 +6,10 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
-#include <time.h>
+#include <dirent.h>
 
-#include "network/dialog/response.h"
 #include "logging/logging.h"
 #include "network/address.h"
-#include "files/files.h"
-#include "util/date.h"
 
 const int TCP_STACK = 5;
 char * rootDirectory = NULL;
@@ -62,46 +59,18 @@ int main(int argc, char** argv) {
 
     // TODO : Find why it doesn't get the last line of headers
 
-    // char * header = "Host: 127.0.0.1:8080";
 
-    // server_log(INFO, "Header %s parsed as %s", header, headerToStr(headerFromStr(header)));
+    DIR *dp;
+    struct dirent *ep;
 
-    // requestFromStr(req2);
-
-    // startServer(argc, argv);
-
-    /*
-    int fd = openFile("/home/altaks/Documents/dev/c/HTTPServer/", "README.md");
-    char *text = NULL;
-    ssize_t text_length;
-    readFile(fd, &text, &text_length);
-    closeFile(fd);
-    server_log(INFO, "Read content of size %i from file : %s", text_length, text);
-     */
-
-
-    if(argc != 3){
-        server_log(ERROR, "Usage : %s port rootDirectoryPath", argv[0]);
-        exit(EXIT_FAILURE);
-    }
-
-    short port = atoi(argv[1]);
-    rootDirectory = argv[2];
-
-    int filefd = openFile(rootDirectory, "/index.html");
-    if(filefd == -1){
-        server_log(FATAL, "An error has occured while opening file : %s", strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-    char * text;
-    ssize_t text_len;
-    readFile(filefd, &text, &text_len);
-    printf("Last modified time : %s\n", getLastModifiedTime(rootDirectory, "/index.html"));
-
-    closeFile(filefd);
-    printf("%s\n", text);
-
-    // buildResponse(req3);
+    dp = opendir("/home/altaks/Documents/dev/c/HTTPServer/config/mimetypes");
+    if (dp != NULL)
+    {
+        while ((ep = readdir (dp))) {
+            printf("Filename: %s\n", ep->d_name);
+        }
+        closedir (dp);
+    } else perror ("Couldn't open the directory");
 
     return 0;
 }

@@ -1,3 +1,6 @@
+#ifndef FILES_H
+#define FILES_H
+
 #include <stdlib.h>
 #include "../network/dialog/response.h"
 
@@ -38,3 +41,5 @@ char* getLastModifiedTime(char* directory, char* path);
  * @return the content type of the file
  */
 MIMEContentType detectMIMEContentType(char* directory, char* path);
+
+#endif
