@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <errno.h>
 #include "response.h"
 #include "../../logging/logging.h"
 #include "../../util/date.h"
+#include "../../files/files.h"
 
 char* HTTPResponseCodeToStr(HTTPResponseCode code) {
     switch (code) {
@@ -191,7 +193,7 @@ char* HTTPResponseCodeToStr(HTTPResponseCode code) {
     }
 }
 
-HTTPResponse buildResponse(char * request){
+HTTPResponse buildResponse(char * rootDirectory, char * request){
 
     if(strlen(request) > 0) {
 
@@ -215,15 +217,60 @@ HTTPResponse buildResponse(char * request){
         printf("%s", responseToSend.expires);
 
         // set response server type
+        responseToSend.server = "HTTPServer/0.0.1";
 
-        // TODO : Check if request is valid
+        if(convertedRequest.command.type == UNKNOWN || convertedRequest.command.path == NULL || convertedRequest.command.version > HTTP1_1) {
+            responseToSend.code = RESPONSE_CLIENT_ERROR_BAD_REQUEST;
+            responseToSend.contentType = CONTENT_TYPE_TEXT_PLAIN;
+            responseToSend.body = "Bad Request";
+            return responseToSend;
+        }
 
         // Analyse HTTP Command
+        switch (convertedRequest.command.type) {
+            case GET:
+                if(strlen(convertedRequest.command.path) <= 0){
+                    int fileDescriptor = openFile(rootDirectory, convertedRequest.command.path);
 
+                    if(fileDescriptor == -1){
+                        server_log(FATAL, "An error has occured while opening file : %s", strerror(errno));
+                        responseToSend.code = RESPONSE_CLIENT_ERROR_NOT_FOUND;
+                        responseToSend.body = "Content not found";
+                        responseToSend.contentType = CONTENT_TYPE_TEXT_PLAIN;
+                        return responseToSend;
+                    } else {
+                        ssize_t text_len;
+                        readFile(fileDescriptor, &responseToSend.body, &responseToSend.contentLength);
+
+                        // Detect file last modified
+
+                        responseToSend.lastModified = getLastModifiedTime(rootDirectory, convertedRequest.command.path);
+                        // TODO : Detect content type
+
+
+
+                        closeFile(fileDescriptor);
+                        responseToSend.code = RESPONSE_SUCCESS_OK;
+                    }
+                } else {
+                    responseToSend.code = RESPONSE_CLIENT_ERROR_BAD_REQUEST;
+                    responseToSend.contentType = CONTENT_TYPE_TEXT_PLAIN;
+                    responseToSend.body = "Bad Request";
+                    return responseToSend;
+                }
+                break;
+            default:
+                responseToSend.code = RESPONSE_SERVER_ERROR_NOT_IMPLEMENTED;
+                responseToSend.contentType = CONTENT_TYPE_TEXT_PLAIN;
+                responseToSend.body = "Method isn't supported yet";
+                return responseToSend;
+        }
 
         // Query file in file system
 
         // Detect MIME file type
+
+        // Set file last modified date
 
         // Check for errors
         // Build response

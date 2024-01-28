@@ -15,6 +15,7 @@
 #include "util/date.h"
 
 const int TCP_STACK = 5;
+char * rootDirectory = NULL;
 
 void startServer(int argc, char** argv);
 
@@ -78,7 +79,29 @@ int main(int argc, char** argv) {
     server_log(INFO, "Read content of size %i from file : %s", text_length, text);
      */
 
-    buildResponse(req3);
+
+    if(argc != 3){
+        server_log(ERROR, "Usage : %s port rootDirectoryPath", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    short port = atoi(argv[1]);
+    rootDirectory = argv[2];
+
+    int filefd = openFile(rootDirectory, "/index.html");
+    if(filefd == -1){
+        server_log(FATAL, "An error has occured while opening file : %s", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
+    char * text;
+    ssize_t text_len;
+    readFile(filefd, &text, &text_len);
+    printf("Last modified time : %s\n", getLastModifiedTime(rootDirectory, "/index.html"));
+
+    closeFile(filefd);
+    printf("%s\n", text);
+
+    // buildResponse(req3);
 
     return 0;
 }
@@ -89,14 +112,14 @@ int main(int argc, char** argv) {
     struct sockaddr_in server;
 
     if(argc != 3){
-        server_log(ERROR, "Usage : %s id port", argv[0]);
+        server_log(ERROR, "Usage : %s port rootDirectoryPath", argv[0]);
         exit(EXIT_FAILURE);
     }
 
-    char* id = argv[1];
-    short port = atoi(argv[2]);
+    short port = atoi(argv[1]);
+    rootDirectory = argv[2]; // TODO : Check for directory existence
 
-    server_log(INFO, "Server launched with id %s and port %i", id, port);
+    server_log(INFO, "Server launched on port %i and root directory %s", port, rootDirectory);
 
     int sock = socket(AF_INET, SOCK_STREAM, 0);
 

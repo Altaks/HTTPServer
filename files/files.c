@@ -2,9 +2,11 @@
 #include <stdbool.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "files.h"
 #include "../logging/logging.h"
+#include "sys/stat.h"
 
 bool endsWithSlash(char* path){
     return path[strlen(path) - 1] == '/';
@@ -59,7 +61,31 @@ void readFile(int fd, char** text_ptr, ssize_t * text_length_ptr) {
     }
 }
 
+
+char* getLastModifiedTime(char* rootDirectory, char* path) {
+    u_int16_t length = strlen(rootDirectory) + strlen(path) + (endsWithSlash(rootDirectory) ? 1 : 2);
+    char * fullPath = calloc(length, sizeof(char));
+
+    // Construct path using values and add a slash if necessary
+    strcat(fullPath, rootDirectory);
+    if(!endsWithSlash(rootDirectory)) {
+        strcat(fullPath, "/");
+    }
+    strcat(fullPath, path);
+
+
+    struct stat attrib;
+    stat(fullPath, &attrib);
+    char * date = calloc(30, sizeof(char));
+    strftime(date, 30, "%a, %d %b %Y %H:%M:%S %Z", gmtime(&(attrib.st_mtim.tv_sec)));
+    return date;
+}
+
 void closeFile(int fd) {
     server_log(INFO, "Closed file w/ fd: %i", fd);
     close(fd);
+}
+
+MIMEContentType detectMIMEContentType(char* directory, char* path) {
+    
 }

@@ -122,8 +122,9 @@ struct HTTPResponse {
     char * expires;
     char * lastModified;
     char * body;
+    ssize_t contentLength;
 };
 
-HTTPResponse buildResponse(char * request_txt);
+HTTPResponse buildResponse(char * rootDirectory, char * request_txt);
 
 char* responseToStr(HTTPResponse response);

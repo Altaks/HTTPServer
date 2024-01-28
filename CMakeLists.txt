@@ -14,4 +14,5 @@ add_executable(HTTPServer main.c
         files/files.c
         network/dialog/response.c
         util/date.c
-        util/date.h)
+        util/date.h
+)
