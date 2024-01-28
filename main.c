@@ -6,11 +6,13 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
+#include <time.h>
 
-#include "network/dialog//requests.h"
+#include "network/dialog/response.h"
 #include "logging/logging.h"
 #include "network/address.h"
 #include "files/files.h"
+#include "util/date.h"
 
 const int TCP_STACK = 5;
 
@@ -18,13 +20,7 @@ void startServer(int argc, char** argv);
 
 int main(int argc, char** argv) {
 
-    HTTPRequest req = {0};
-
-    req.command.type = GET;
-    req.command.path = "/";
-    req.command.version = HTTP1;
-
-    char * req2 = "GET / HTTP/1.1\r\n"
+    char * req2 = "GET /\r\n"
                   "Host: 127.0.0.1:8080\r\n"
                   "Connection: keep-alive\r\n"
                   "Cache-Control: max-age=0\r\n"
@@ -46,7 +42,7 @@ int main(int argc, char** argv) {
                   "\r\n"
                   "\r\n";
 
-    char * req3 = "GET / HTTP/1.1\r\n"
+    char * req3 = "GET /index.html HTTP/1.1\r\n"
                   "Host: 127.0.0.1:8080\r\n"
                   "Connection: keep-alive\r\n"
                   "Cache-Control: max-age=0\r\n"
@@ -63,11 +59,13 @@ int main(int argc, char** argv) {
                   "Accept-Encoding: gzip, deflate, br\r\n"
                   "Accept-Language: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7\r\n\r\n";
 
+    // TODO : Find why it doesn't get the last line of headers
+
     // char * header = "Host: 127.0.0.1:8080";
 
     // server_log(INFO, "Header %s parsed as %s", header, headerToStr(headerFromStr(header)));
 
-    requestFromStr(req2);
+    // requestFromStr(req2);
 
     // startServer(argc, argv);
 
@@ -79,6 +77,8 @@ int main(int argc, char** argv) {
     closeFile(fd);
     server_log(INFO, "Read content of size %i from file : %s", text_length, text);
      */
+
+    buildResponse(req3);
 
     return 0;
 }
@@ -170,22 +170,7 @@ int main(int argc, char** argv) {
             }
         }
 
-        if(strlen(request) > 0) {
-            char* request_cpy = malloc(strlen(request) + 1);
-            strcpy(request_cpy, request);
-
-            char* req_head = strtok(request_cpy, "\r\n");
-
-            HTTPCommand command = commandFromStr(req_head);
-            free(request_cpy);
-
-            server_log(INFO, "Request command parsed as [method: %s, path: %s, version: %s] from [address: %s, port: %i]",
-                       requestTypeToStr(command.type),
-                       command.path,
-                       httpVersionToStr(command.version),
-                       client_addr,
-                       ntohs(client.sin_port));
-        }
+        // TODO : Add response algorithm
 
         close(dialog_socket);
 

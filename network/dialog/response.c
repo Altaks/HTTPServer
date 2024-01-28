@@ -1,4 +1,10 @@
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
 #include "response.h"
+#include "../../logging/logging.h"
+#include "../../util/date.h"
 
 char* HTTPResponseCodeToStr(HTTPResponseCode code) {
     switch (code) {
@@ -183,4 +189,52 @@ char* HTTPResponseCodeToStr(HTTPResponseCode code) {
         default:
             return "Unknown Error Code";
     }
+}
+
+HTTPResponse buildResponse(char * request){
+
+    if(strlen(request) > 0) {
+
+        // Parse request into HTTP Request
+
+        HTTPRequest convertedRequest = requestFromStr(request);
+        HTTPResponse responseToSend = {0};
+
+        // set response date
+
+        responseToSend.date = calloc(38, sizeof(char));
+        strncat(responseToSend.date, "Date: ", 6);
+        strncat(responseToSend.date, getOffsetDate(0), 30);
+        strncat(responseToSend.date, "\r\n", 2);
+        printf("%s", responseToSend.date);
+
+        responseToSend.expires = calloc(41, sizeof(char));
+        strncat(responseToSend.expires, "Expires: ", 9);
+        strncat(responseToSend.expires, getOffsetDate(+3600), 30);
+        strncat(responseToSend.expires, "\r\n", 2);
+        printf("%s", responseToSend.expires);
+
+        // set response server type
+
+        // TODO : Check if request is valid
+
+        // Analyse HTTP Command
+
+
+        // Query file in file system
+
+        // Detect MIME file type
+
+        // Check for errors
+        // Build response
+
+
+        // return response
+        return responseToSend;
+    }
+
+}
+
+char* responseToStr(HTTPResponse response) {
+
 }

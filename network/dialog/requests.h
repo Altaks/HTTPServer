@@ -3,6 +3,7 @@
  */
 typedef enum RequestType RequestType;
 enum RequestType {
+    UNKNOWN,
     GET,
     HEAD,
     POST,

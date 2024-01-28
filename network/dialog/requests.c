@@ -24,8 +24,10 @@ char* requestTypeToStr(RequestType requestType) {
             return "TRACE";
         case PATCH:
             return "PATCH";
+        case UNKNOWN:
+            return "UNKNOWN";
         default:
-            return "Unknown request type";
+            return "Invalid request type";
     }
 }
 
@@ -62,17 +64,16 @@ HTTPVersion httpVersionFromStr(char* str){
 
 HTTPCommand commandFromStr(char* str) {
 
-    // Creating empty request data
-    HTTPCommand request = {0};
+    // Creating empty command data
+    HTTPCommand command = {0};
 
-    server_log(INFO, "Obtained request header of length : %i", strlen(str));
+    server_log(INFO, "Obtained command header of length : %i", strlen(str));
 
-    // Cloning request line to another string in order to use strtok safely (avoid segfaults due to array overflows)
-    char * phrase = malloc(strlen(str) > 256 ? strlen(str) : 256);
-    strcpy(phrase, str);
+    // Copying command to avoid modifying the original string
+    char * command_cpy = calloc(strlen(str) + 1, sizeof(char)); // Removing \r\n from the end of the string
+    strncpy(command_cpy, str, strlen(str));
 
-    // Start the string parkour and keeping track of the token index.
-    char * token = strtok(phrase, " ");
+    char * token = strtok(command_cpy, " ");
     int8_t token_index = 0;
 
     // As long as there are tokens :
@@ -82,16 +83,16 @@ HTTPCommand commandFromStr(char* str) {
         switch (token_index) {
             case 0:
                 // Method of the request
-                request.type = requestTypeFromStr(token);
+                command.type = requestTypeFromStr(token);
                 break;
             case 1:
                 // Path of the request
-                request.path = malloc(sizeof(char) * strlen(token) + 1);
-                strcpy(request.path, token);
+                command.path = calloc(strlen(token) + 1, sizeof(char));
+                strcpy(command.path, token);
                 break;
             case 2:
                 // HTTP version of the request
-                request.version = httpVersionFromStr(token);
+                command.version = httpVersionFromStr(token);
                 break;
             default:
                 continue;
@@ -102,8 +103,8 @@ HTTPCommand commandFromStr(char* str) {
         token_index++;
     }
 
-    free(phrase);
-    return request;
+    free(command_cpy);
+    return command;
 }
 
 
@@ -157,8 +158,6 @@ HTTPRequest requestFromStr(char* str) {
     strncpy(req_head, curr_req_pos, req_head_size);
     curr_req_pos += (sizeof(char) * req_head_size) + strlen(delimiter);
 
-    server_log(INFO, "Request header has been determined as %s", req_head);
-
     char * req_body = NULL;
 
     // If request has a body
@@ -166,7 +165,7 @@ HTTPRequest requestFromStr(char* str) {
         long req_body_size = strstr(curr_req_pos, delimiter) - curr_req_pos;
         req_body = malloc(sizeof(char) * req_head_size + 1);
         strncpy(req_body, curr_req_pos, req_body_size);
-        curr_req_pos += (sizeof(char) * req_body_size) + strlen(delimiter);
+        curr_req_pos += (sizeof(char) * req_body_size) + strlen(delimiter); // TODO : Check if this is useful ?
 
         server_log(INFO, "Request body has been determined as %s", req_body);
     }
@@ -184,15 +183,16 @@ HTTPRequest requestFromStr(char* str) {
     char * req_head_pos = req_head;
 
     long req_command_size = strstr(req_head_pos, line_delimiter) - req_head_pos;
-    char * req_command = malloc(sizeof(char) * req_command_size + 1);
+    char * req_command = calloc(req_command_size + 1, sizeof(char));
     strncpy(req_command, req_head_pos, req_command_size);
 
     // Move ptr after the first line
     req_head_pos += req_command_size + strlen(line_delimiter);
 
-    server_log(INFO, "Request command determined as %s", req_command);
-
     request.command = commandFromStr(req_command);
+
+    server_log(INFO, "Request command determined as [method: %s, path: %s, version: %s]", requestTypeToStr(request.command.type), request.command.path,
+               httpVersionToStr(request.command.version));
     free(req_command);
 
     // -------------------- REQ_HEAD TREATMENT --------------------

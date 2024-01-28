@@ -1,0 +1,1 @@
+char* getOffsetDate(int offset);

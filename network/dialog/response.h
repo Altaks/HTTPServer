@@ -1,3 +1,5 @@
+#include "requests.h"
+
 typedef enum HTTPResponseCode HTTPResponseCode;
 enum HTTPResponseCode {
 
@@ -103,15 +105,25 @@ enum HTTPResponseCode {
 
 char* HTTPResponseCodeToStr(HTTPResponseCode code);
 
+typedef enum MIMEContentType MIMEContentType;
+enum MIMEContentType {
+    CONTENT_TYPE_TEXT_PLAIN,
+    CONTENT_TYPE_TEXT_HTML,
+    CONTENT_TYPE_MULTIPART_MIXED,
+    CONTENT_TYPE_MULTIPART_ALTERNATIVE,
+};
+
 typedef struct HTTPResponse HTTPResponse;
 struct HTTPResponse {
     HTTPResponseCode code;
     char * date;
     char * server;
-    char * contentType;
+    MIMEContentType contentType;
     char * expires;
     char * lastModified;
     char * body;
 };
+
+HTTPResponse buildResponse(char * request_txt);
 
 char* responseToStr(HTTPResponse response);
