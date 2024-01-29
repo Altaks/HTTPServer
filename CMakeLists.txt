@@ -17,4 +17,6 @@ add_executable(HTTPServer main.c
         util/date.h
         util/date/hashmap.c
         util/date/hashmap.h
+        util/math.h
+        util/math.c
 )

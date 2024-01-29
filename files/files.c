@@ -9,6 +9,8 @@
 #include "sys/stat.h"
 #include "../util/date/hashmap.h"
 
+struct hashmap * mimeContentTypes = NULL;
+
 bool endsWithSlash(char* path){
     return path[strlen(path) - 1] == '/';
 }
@@ -223,9 +225,7 @@ char* contentTypeToString(MIMEContentType type) {
     }
 }
 
-struct hashmap * mimeContentTypes = NULL;
-
-void initMimeContentTypes() {
+void initMimeContentTypes(int * insertedAmount) {
     if(mimeContentTypes == NULL){
         mimeContentTypes = new_map(CONTENT_TYPE_MAX_LENGTH);
 
@@ -300,6 +300,8 @@ void initMimeContentTypes() {
         map_set(mimeContentTypes, "3gp", CONTENT_TYPE_VIDEO_3GPP);
         map_set(mimeContentTypes, "3g2", CONTENT_TYPE_VIDEO_3GPP2);
         map_set(mimeContentTypes, "7z", CONTENT_TYPE_APPLICATION_X_7Z_COMPRESSED);
+
+        *insertedAmount = 68;
     }
 }
 

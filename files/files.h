@@ -58,6 +58,6 @@ MIMEContentType detectMimeContentTypes(char* filename);
 /**
  * Initializes the MIME content types hashmap
  */
-void initMimeContentTypes();
+void initMimeContentTypes(int * insertedAmount);
 
 #endif

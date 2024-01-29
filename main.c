@@ -62,18 +62,35 @@ int main(int argc, char** argv) {
 
     // TODO : Find why it doesn't get the last line of headers
 
-    initMimeContentTypes();
+    int mimeContentTypesInsertedAmount = 0;
+    initMimeContentTypes(&mimeContentTypesInsertedAmount);
+    server_log(INFO, "MIME file types hash table initialized, %i files types supported", mimeContentTypesInsertedAmount);
 
-    server_log(INFO, "Detecting file type of \"index.html\" : %s", contentTypeToString(detectMimeContentTypes("index.html")));
-    server_log(INFO, "Detecting file type of \"main.css\" : %s", contentTypeToString(detectMimeContentTypes("main.css")));
-    server_log(INFO, "Detecting file type of \"main.js\" : %s", contentTypeToString(detectMimeContentTypes("main.js")));
-    server_log(INFO, "Detecting file type of \"image.png\" : %s", contentTypeToString(detectMimeContentTypes("image.png")));
+    // HTTPResponse response = buildResponse(argv[3], req3);
+
+    HTTPResponse mockResp = {0};
+    mockResp.date           = "Mon, 29 Jan 2024 09:59:51 GMT";
+    mockResp.expires        = "Mon, 29 Jan 2024 03:59:51 GMT";
+    mockResp.lastModified   = "Mon, 29 Jan 2024 06:07:43 GMT";
+
+    mockResp.code = RESPONSE_SUCCESS_OK;
+    mockResp.body = "<p>Hello World !</p>";
+    mockResp.server = "HTTPServer/1.0.0 (Linux)";
+    mockResp.contentLength = strlen(mockResp.body);
+    mockResp.contentType= CONTENT_TYPE_TEXT_HTML;
+
+    server_log(INFO, "Mock response : %s", responseToStr(mockResp));
 
     return 0;
 }
 
 [[noreturn]] void startServer(int argc, char** argv){
     server_log(INFO, "Booting the server...");
+    server_log(INFO, "Initializing MIME file types hash table...");
+
+    int mimeContentTypesInsertedAmount = 0;
+    initMimeContentTypes(&mimeContentTypesInsertedAmount);
+    server_log(INFO, "MIME file types hash table initialized, %i files types supported", mimeContentTypesInsertedAmount);
 
     struct sockaddr_in server;
 

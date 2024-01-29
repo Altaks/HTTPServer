@@ -1,8 +1,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
 #include <errno.h>
+
+#include "math.h"
 #include "response.h"
 #include "../../logging/logging.h"
 #include "../../util/date.h"
@@ -239,18 +240,15 @@ HTTPResponse buildResponse(char * rootDirectory, char * request){
                         responseToSend.contentType = CONTENT_TYPE_TEXT_PLAIN;
                         return responseToSend;
                     } else {
-                        ssize_t text_len;
+                        // Collect file content
                         readFile(fileDescriptor, &responseToSend.body, &responseToSend.contentLength);
-
-                        // Detect file last modified
-
-                        responseToSend.lastModified = getLastModifiedTime(rootDirectory, convertedRequest.command.path);
-                        // TODO : Detect content type
-
-
-
                         closeFile(fileDescriptor);
+                        // Detect file last modified
+                        responseToSend.lastModified = getLastModifiedTime(rootDirectory, convertedRequest.command.path);
+                        // Detect content type
+                        responseToSend.contentType = detectMimeContentTypes(convertedRequest.command.path);
                         responseToSend.code = RESPONSE_SUCCESS_OK;
+                        return responseToSend;
                     }
                 } else {
                     responseToSend.code = RESPONSE_CLIENT_ERROR_BAD_REQUEST;
@@ -266,16 +264,6 @@ HTTPResponse buildResponse(char * rootDirectory, char * request){
                 return responseToSend;
         }
 
-        // Query file in file system
-
-        // Detect MIME file type
-
-        // Set file last modified date
-
-        // Check for errors
-        // Build response
-
-
         // return response
         return responseToSend;
     }
@@ -283,5 +271,71 @@ HTTPResponse buildResponse(char * rootDirectory, char * request){
 }
 
 char* responseToStr(HTTPResponse response) {
+    char * responseStr = calloc(
+            strlen(httpVersionToStr(HTTP1_1)) + // length of HTTP version
+            1 + // space
+            3 + // length of response code
+            1 + // space
+            strlen(HTTPResponseCodeToStr(response.code)) + // length of response code text
+            2 +  // for the "\r\n"
+            1 /* for the terminating zero */,sizeof(char));
+    sprintf(responseStr, "%s %i %s\r\n", httpVersionToStr(HTTP1_1), response.code, HTTPResponseCodeToStr(response.code));
 
+    if(response.date != NULL){
+        responseStr = reallocarray(responseStr, strlen(responseStr) + strlen("Date : ") + strlen(response.date) + strlen("\r\n") + 1,sizeof(char));
+        strcat(responseStr, "Date: ");
+        strcat(responseStr, response.date);
+        strcat(responseStr, "\r\n");
+    }
+
+    if(response.server != NULL){
+        responseStr = reallocarray(responseStr, strlen(responseStr) + strlen("Server: ") + strlen(response.server) + strlen("\r\n") + 1,sizeof(char));
+        strcat(responseStr, "Server: ");
+        strcat(responseStr, response.server);
+        strcat(responseStr, "\r\n");
+    }
+
+    if(response.contentType != UNKNOWN){
+        responseStr = reallocarray(responseStr, strlen(responseStr) + strlen("Content-Type: ") + strlen(contentTypeToString(response.contentType)) + strlen("\r\n") + 1,sizeof(char));
+        strcat(responseStr, "Content-Type: ");
+        strcat(responseStr, contentTypeToString(response.contentType));
+        strcat(responseStr, "\r\n");
+    }
+
+    if(response.contentLength != 0){
+        responseStr = reallocarray(responseStr, strlen(responseStr) + strlen("Content-Length: ") + ((int)log10(response.contentLength) + 1) + strlen("\r\n") + 1,sizeof(char));
+        strcat(responseStr, "Content-Length: ");
+
+        char buffer[(int) log10(response.contentLength) + 1];
+        sprintf(buffer, "%i", (int)response.contentLength);
+        strcat(responseStr, buffer);
+        strcat(responseStr, "\r\n");
+    }
+
+    if(response.expires != NULL){
+        responseStr = reallocarray(responseStr, strlen(responseStr) + strlen("Expires: ") + strlen(response.expires) + strlen("\r\n") + 1,sizeof(char));
+        strcat(responseStr, "Expires: ");
+        strcat(responseStr, response.expires);
+        strcat(responseStr, "\r\n");
+    }
+
+    if(response.expires != NULL){
+        responseStr = reallocarray(responseStr, strlen(responseStr) + strlen("Last-Modified: ") + strlen(response.lastModified) + strlen("\r\n") + 1,sizeof(char));
+        strcat(responseStr, "Last-Modified: ");
+        strcat(responseStr, response.lastModified);
+        strcat(responseStr, "\r\n");
+    }
+
+    ulong bodyLength = response.body != NULL ? strlen(response.body) + strlen("\r\n"): 0;
+    responseStr = reallocarray(responseStr, strlen(responseStr) + bodyLength + (strlen("\r\n") * 3) + 1,sizeof(char));
+    strcat(responseStr, "\r\n");
+
+    if(response.body != NULL){
+        strcat(responseStr, response.body);
+        strcat(responseStr, "\r\n");
+    }
+
+    strcat(responseStr, "\r\n\r\n");
+
+    return responseStr;
 }
