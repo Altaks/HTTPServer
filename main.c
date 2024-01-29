@@ -8,11 +8,14 @@
 #include <stdbool.h>
 #include <dirent.h>
 
+#include "files/files.h"
 #include "logging/logging.h"
 #include "network/address.h"
 
 const int TCP_STACK = 5;
+
 char * rootDirectory = NULL;
+char * configDirectory = NULL;
 
 void startServer(int argc, char** argv);
 
@@ -59,18 +62,12 @@ int main(int argc, char** argv) {
 
     // TODO : Find why it doesn't get the last line of headers
 
+    initMimeContentTypes();
 
-    DIR *dp;
-    struct dirent *ep;
-
-    dp = opendir("/home/altaks/Documents/dev/c/HTTPServer/config/mimetypes");
-    if (dp != NULL)
-    {
-        while ((ep = readdir (dp))) {
-            printf("Filename: %s\n", ep->d_name);
-        }
-        closedir (dp);
-    } else perror ("Couldn't open the directory");
+    server_log(INFO, "Detecting file type of \"index.html\" : %s", contentTypeToString(detectMimeContentTypes("index.html")));
+    server_log(INFO, "Detecting file type of \"main.css\" : %s", contentTypeToString(detectMimeContentTypes("main.css")));
+    server_log(INFO, "Detecting file type of \"main.js\" : %s", contentTypeToString(detectMimeContentTypes("main.js")));
+    server_log(INFO, "Detecting file type of \"image.png\" : %s", contentTypeToString(detectMimeContentTypes("image.png")));
 
     return 0;
 }
@@ -87,6 +84,7 @@ int main(int argc, char** argv) {
 
     short port = atoi(argv[1]);
     rootDirectory = argv[2]; // TODO : Check for directory existence
+    configDirectory = argv[3]; // TODO : Check for directory existence
 
     server_log(INFO, "Server launched on port %i and root directory %s", port, rootDirectory);
 

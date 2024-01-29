@@ -6,8 +6,16 @@
 #include <string.h>
 #include <stdbool.h>
 
-struct map_item;
-struct hashmap;
+struct map_item {
+    char* key;
+    int val;
+    struct map_item* next;
+};
+
+struct hashmap {
+    struct map_item* data;
+    int capacity;
+};
 
 struct hashmap* new_map(int capacity);
 void del_map(struct hashmap* map);

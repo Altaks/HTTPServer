@@ -1,16 +1,5 @@
 #include "hashmap.h"
 
-struct map_item {
-    char* key;
-    int val;
-    struct map_item* next;
-};
-
-struct hashmap {
-    struct map_item* data;
-    int capacity;
-};
-
 struct hashmap* new_map(int capacity) {
     struct hashmap* map = (struct hashmap*)malloc(sizeof(struct hashmap));
     map->capacity = capacity;

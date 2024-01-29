@@ -35,11 +35,29 @@ inline void closeFile(int fd);
 char* getLastModifiedTime(char* directory, char* path);
 
 /**
- * Detects the content type of the searched file
- * @param directory the root directory to search the file in
- * @param path the path of the file
- * @return the content type of the file
+ * Converts a MIME content type to a string
+ * @param type the MIME content type
+ * @return the string corresponding to the MIME content type
  */
-MIMEContentType detectMIMEContentType(char* directory, char* path);
+char* contentTypeToString(MIMEContentType type);
+
+/**
+ * Converts a extension to a MIME content type
+ * @param type the extension to convert
+ * @return the MIME content type
+ */
+MIMEContentType contentTypeFromExtension(char* extension);
+
+/**
+ * Detects the MIME content type of a file
+ * @param filename the name of the file
+ * @return the MIME content type
+ */
+MIMEContentType detectMimeContentTypes(char* filename);
+
+/**
+ * Initializes the MIME content types hashmap
+ */
+void initMimeContentTypes();
 
 #endif
