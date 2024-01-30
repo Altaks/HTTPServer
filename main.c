@@ -66,20 +66,9 @@ int main(int argc, char** argv) {
     initMimeContentTypes(&mimeContentTypesInsertedAmount);
     server_log(INFO, "MIME file types hash table initialized, %i files types supported", mimeContentTypesInsertedAmount);
 
-    // HTTPResponse response = buildResponse(argv[3], req3);
+    char * response = responseToStr(buildResponse(argv[2], req3));
 
-    HTTPResponse mockResp = {0};
-    mockResp.date           = "Mon, 29 Jan 2024 09:59:51 GMT";
-    mockResp.expires        = "Mon, 29 Jan 2024 03:59:51 GMT";
-    mockResp.lastModified   = "Mon, 29 Jan 2024 06:07:43 GMT";
-
-    mockResp.code = RESPONSE_SUCCESS_OK;
-    mockResp.body = "<p>Hello World !</p>";
-    mockResp.server = "HTTPServer/1.0.0 (Linux)";
-    mockResp.contentLength = strlen(mockResp.body);
-    mockResp.contentType= CONTENT_TYPE_TEXT_HTML;
-
-    server_log(INFO, "Mock response : %s", responseToStr(mockResp));
+    printf("Mock response : \n%s\n", response);
 
     return 0;
 }
@@ -101,7 +90,6 @@ int main(int argc, char** argv) {
 
     short port = atoi(argv[1]);
     rootDirectory = argv[2]; // TODO : Check for directory existence
-    configDirectory = argv[3]; // TODO : Check for directory existence
 
     server_log(INFO, "Server launched on port %i and root directory %s", port, rootDirectory);
 

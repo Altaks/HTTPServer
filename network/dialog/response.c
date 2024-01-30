@@ -205,17 +205,11 @@ HTTPResponse buildResponse(char * rootDirectory, char * request){
 
         // set response date
 
-        responseToSend.date = calloc(38, sizeof(char));
-        strncat(responseToSend.date, "Date: ", 6);
+        responseToSend.date = calloc(30, sizeof(char));
         strncat(responseToSend.date, getOffsetDate(0), 30);
-        strncat(responseToSend.date, "\r\n", 2);
-        printf("%s", responseToSend.date);
 
-        responseToSend.expires = calloc(41, sizeof(char));
-        strncat(responseToSend.expires, "Expires: ", 9);
+        responseToSend.expires = calloc(30, sizeof(char));
         strncat(responseToSend.expires, getOffsetDate(+3600), 30);
-        strncat(responseToSend.expires, "\r\n", 2);
-        printf("%s", responseToSend.expires);
 
         // set response server type
         responseToSend.server = "HTTPServer/0.0.1";
@@ -230,7 +224,7 @@ HTTPResponse buildResponse(char * rootDirectory, char * request){
         // Analyse HTTP Command
         switch (convertedRequest.command.type) {
             case GET:
-                if(strlen(convertedRequest.command.path) <= 0){
+                if(strlen(convertedRequest.command.path) > 0){
                     int fileDescriptor = openFile(rootDirectory, convertedRequest.command.path);
 
                     if(fileDescriptor == -1){
@@ -319,7 +313,7 @@ char* responseToStr(HTTPResponse response) {
         strcat(responseStr, "\r\n");
     }
 
-    if(response.expires != NULL){
+    if(response.lastModified != NULL){
         responseStr = reallocarray(responseStr, strlen(responseStr) + strlen("Last-Modified: ") + strlen(response.lastModified) + strlen("\r\n") + 1,sizeof(char));
         strcat(responseStr, "Last-Modified: ");
         strcat(responseStr, response.lastModified);

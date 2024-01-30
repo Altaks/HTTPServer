@@ -238,4 +238,6 @@ HTTPRequest requestFromStr(char* str) {
     // -------------------- MEMORY CLEANING --------------------
 
     free(req_head);
+
+    return request;
 }
