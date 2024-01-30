@@ -62,6 +62,7 @@ int main(int argc, char** argv) {
 
     // TODO : Find why it doesn't get the last line of headers
 
+    /*
     int mimeContentTypesInsertedAmount = 0;
     initMimeContentTypes(&mimeContentTypesInsertedAmount);
     server_log(INFO, "MIME file types hash table initialized, %i files types supported", mimeContentTypesInsertedAmount);
@@ -69,7 +70,9 @@ int main(int argc, char** argv) {
     char * response = responseToStr(buildResponse(argv[2], req3));
 
     printf("Mock response : \n%s\n", response);
+    */
 
+    startServer(argc, argv);
     return 0;
 }
 
@@ -150,10 +153,10 @@ int main(int argc, char** argv) {
                 exit(EXIT_FAILURE);
             } else if(bytes_received > 0){
                 if(request == NULL) {
-                    request = malloc(sizeof(char) * bytes_received);
-                    strcpy(request, buff_read);
+                    request = calloc(bytes_received + 1, sizeof(char));
+                    strncpy(request, buff_read, bytes_received);
                 } else {
-                    request = realloc(request, strlen(request) + strlen(buff_read) + 1);
+                    request = reallocarray(request, strlen(request) + strlen(buff_read) + 1, sizeof(char));
                     if(request == NULL){
                         printf("Reallocation of buffer at address %p as failed during expanding resources expansion", request);
                     }
@@ -165,7 +168,15 @@ int main(int argc, char** argv) {
             }
         }
 
-        // TODO : Add response algorithm
+        char * response = responseToStr(buildResponse(rootDirectory, request));
+
+        if(response != NULL){
+            send(dialog_socket, response, strlen(response), 0);
+        } else {
+            server_log(ERROR, "Response is NULL ???");
+        }
+
+        if(response != NULL) free(response);
 
         close(dialog_socket);
 
