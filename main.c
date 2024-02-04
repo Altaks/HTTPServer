@@ -6,7 +6,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
-#include <dirent.h>
 
 #include "files/files.h"
 #include "logging/logging.h"
@@ -15,68 +14,10 @@
 const int TCP_STACK = 5;
 
 char * rootDirectory = NULL;
-char * configDirectory = NULL;
 
 void startServer(int argc, char** argv);
 
 int main(int argc, char** argv) {
-
-    char * req2 = "GET /\r\n"
-                  "Host: 127.0.0.1:8080\r\n"
-                  "Connection: keep-alive\r\n"
-                  "Cache-Control: max-age=0\r\n"
-                  "sec-ch-ua: \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"\r\n"
-                  "sec-ch-ua-mobile: ?0\r\n"
-                  "sec-ch-ua-platform: \"Linux\"\r\n"
-                  "DNT: 1\r\n"
-                  "Upgrade-Insecure-Requests: 1\r\n"
-                  "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36\r\n"
-                  "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7\r\n"
-                  "Sec-Fetch-Site: none\r\n"
-                  "Sec-Fetch-Mode: navigate\r\n"
-                  "Sec-Fetch-User: ?1\r\n"
-                  "Sec-Fetch-Dest: document\r\n"
-                  "Accept-Encoding: gzip, deflate, br\r\n"
-                  "Accept-Language: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7\r\n"
-                  "\r\n"
-                  "Request body is here :3\r\n"
-                  "\r\n"
-                  "\r\n";
-
-    char * req3 = "GET /index.html HTTP/1.1\r\n"
-                  "Host: 127.0.0.1:8080\r\n"
-                  "Connection: keep-alive\r\n"
-                  "Cache-Control: max-age=0\r\n"
-                  "sec-ch-ua: \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"\r\n"
-                  "sec-ch-ua-mobile: ?0\r\n"
-                  "sec-ch-ua-platform: \"Linux\"\r\n"
-                  "DNT: 1\r\n"
-                  "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36\r\n"
-                  "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7\r\n"
-                  "Sec-Fetch-Site: none\r\n"
-                  "Sec-Fetch-Mode: navigate\r\n"
-                  "Sec-Fetch-User: ?1\r\n"
-                  "Sec-Fetch-Dest: document\r\n"
-                  "Accept-Encoding: gzip, deflate, br\r\n"
-                  "Accept-Language: fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7\r\n\r\n";
-
-    // TODO : Find why it doesn't get the last line of headers
-
-    /*
-    int mimeContentTypesInsertedAmount = 0;
-    initMimeContentTypes(&mimeContentTypesInsertedAmount);
-    server_log(INFO, "MIME file types hash table initialized, %i files types supported", mimeContentTypesInsertedAmount);
-
-    char * response = responseToStr(buildResponse(argv[2], req3));
-
-    printf("Mock response : \n%s\n", response);
-    */
-
-    startServer(argc, argv);
-    return 0;
-}
-
-[[noreturn]] void startServer(int argc, char** argv){
     server_log(INFO, "Booting the server...");
     server_log(INFO, "Initializing MIME file types hash table...");
 
@@ -118,6 +59,7 @@ int main(int argc, char** argv) {
     } else {
         char * addr = addressToString(server);
         server_log(INFO, "Successfully bound server address [addr: %s w/ port %i] to socket %i", addr, ntohs(server.sin_port), sock);
+        if(addr != NULL) free(addr);
     }
 
     int listen_rtrn = listen(sock, TCP_STACK);
@@ -176,13 +118,13 @@ int main(int argc, char** argv) {
             server_log(ERROR, "Response is NULL ???");
         }
 
-        if(response != NULL) free(response);
-
         close(dialog_socket);
 
         if(client_addr != NULL) free(client_addr);
         if(request     != NULL) free(request);
+        if(response    != NULL) free(response);
 
         server_log(INFO, "Server connection %i with client on socket %i has been closed and resources have been freed", connection_id, sock);
     }
+    return 0;
 }

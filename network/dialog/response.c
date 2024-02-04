@@ -228,7 +228,7 @@ HTTPResponse buildResponse(char * rootDirectory, char * request){
                     int fileDescriptor = openFile(rootDirectory, convertedRequest.command.path);
 
                     if(fileDescriptor == -1){
-                        server_log(FATAL, "An error has occured while opening file : %s", strerror(errno));
+                        server_log(ERROR, "An error has occured while opening file : %s", strerror(errno));
                         responseToSend.code = RESPONSE_CLIENT_ERROR_NOT_FOUND;
                         responseToSend.body = "Content not found";
                         responseToSend.contentType = CONTENT_TYPE_TEXT_PLAIN;

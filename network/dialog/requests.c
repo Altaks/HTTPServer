@@ -67,8 +67,6 @@ HTTPCommand commandFromStr(char* str) {
     // Creating empty command data
     HTTPCommand command = {0};
 
-    server_log(INFO, "Obtained command header of length : %i", strlen(str));
-
     // Copying command to avoid modifying the original string
     char * command_cpy = calloc(strlen(str) + 1, sizeof(char)); // Removing \r\n from the end of the string
     strncpy(command_cpy, str, strlen(str));
@@ -215,14 +213,8 @@ HTTPRequest requestFromStr(char* str) {
             headers = realloc(headers, sizeof(HTTPHeader) * (headers_count + 5));
             headers_allocated += 5;
         }
-
-        server_log(INFO, "Found header to parse : %s", req_header);
         headers[headers_count++] = headerFromStr(req_header);
         free(req_header);
-    }
-
-    for(int i = 0; i < headers_count; i++){
-        server_log(INFO, "%i'th header : %s", i, headerToStr(headers[i]));
     }
 
     request.headers = headers;
