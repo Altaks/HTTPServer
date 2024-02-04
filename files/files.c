@@ -11,13 +11,18 @@
 
 struct hashmap * mimeContentTypes = NULL;
 
+/**
+ * Checks if a path ends with a slash
+ * @param path the path to check
+ * @return true if the path ends with a slash
+ */
 bool endsWithSlash(char* path){
     return path[strlen(path) - 1] == '/';
 }
 
 int openFile(char* rootDirectory, char* filePath) {
 
-    // reserve enough memory
+    // reserve enough memory for the full path
     u_int16_t length = strlen(rootDirectory) + strlen(filePath) + (endsWithSlash(rootDirectory) ? 1 : 2);
     char * fullPath = calloc(length, sizeof(char));
 
@@ -39,18 +44,23 @@ int openFile(char* rootDirectory, char* filePath) {
 
 void readFile(int fd, char** text_ptr, ssize_t * text_length_ptr) {
 
+    // prepare buffers for reading file by 1024 bytes chunks
     *text_ptr = NULL;
     u_short buffer_size = 1024;
     char buffer[buffer_size];
 
+    // read the file by chunks and append to the text_ptr
     ssize_t bytes_read = 0;
     while(*text_ptr == NULL || bytes_read >= buffer_size) {
 
-        // clear buffer between reads (just in case)
-        memset(&buffer, 0, buffer_size);
+        // read bytes from the file
         bytes_read = read(fd, buffer, buffer_size);
 
+        // if bytes were read
         if(bytes_read != 0){
+
+            // if the text_ptr is NULL, allocate memory for it and copy the buffer into it
+            // otherwise, reallocate memory for the text_ptr and append the buffer to it
             if(*text_ptr == NULL){
                 *text_ptr = calloc(bytes_read + 1, sizeof(char));
                 strncpy(*text_ptr, buffer, bytes_read);
@@ -66,6 +76,8 @@ void readFile(int fd, char** text_ptr, ssize_t * text_length_ptr) {
 
 
 char* getLastModifiedTime(char* rootDirectory, char* path) {
+
+    // reserve enough memory for the full path
     u_int16_t length = strlen(rootDirectory) + strlen(path) + (endsWithSlash(rootDirectory) ? 1 : 2);
     char * fullPath = calloc(length, sizeof(char));
 
@@ -76,16 +88,23 @@ char* getLastModifiedTime(char* rootDirectory, char* path) {
     }
     strcat(fullPath, path);
 
-
+    // get the last modified time of the file using system stat calls
     struct stat attrib;
     stat(fullPath, &attrib);
+
+    // allocate memory for the date
     char * date = calloc(30, sizeof(char));
+
+    // Format the date to a HTTP valid format (GMT)
     strftime(date, 30, "%a, %d %b %Y %H:%M:%S %Z", gmtime(&(attrib.st_mtim.tv_sec)));
     return date;
 }
 
 void closeFile(int fd) {
+    // verbose log
     server_log(INFO, "Closed file w/ fd: %i", fd);
+
+    // close the file
     close(fd);
 }
 

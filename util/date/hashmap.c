@@ -8,7 +8,7 @@ struct hashmap* new_map(int capacity) {
     return map;
 }
 
-void del_map(struct hashmap* map) {
+__attribute__((unused)) void del_map(struct hashmap* map) {
     for(int i = 0; i < map->capacity; i++) {
         struct map_item* crnt = &map->data[i];
         while(crnt->next != NULL) {
@@ -48,7 +48,7 @@ int map_get(struct hashmap* map, char* key) {
     return map_ind->val;
 }
 
-int map_rem(struct hashmap* map, char* key) {
+__attribute__((unused)) int map_rem(struct hashmap* map, char* key) {
     struct map_item* map_ind = &map->data[djb2(map, key)];
     struct map_item* prev_map_ind;
     bool isBase = true;

@@ -224,16 +224,23 @@ HTTPResponse buildResponse(char * rootDirectory, char * request){
         // Analyse HTTP Command
         switch (convertedRequest.command.type) {
             case GET:
+
+                // Check if the path is not empty
                 if(strlen(convertedRequest.command.path) > 0){
+
+                    // Open file
                     int fileDescriptor = openFile(rootDirectory, convertedRequest.command.path);
 
+                    // If file opening didn't work
                     if(fileDescriptor == -1){
                         server_log(ERROR, "An error has occured while opening file : %s", strerror(errno));
                         responseToSend.code = RESPONSE_CLIENT_ERROR_NOT_FOUND;
                         responseToSend.body = "Content not found";
                         responseToSend.contentType = CONTENT_TYPE_TEXT_PLAIN;
                         goto send_request;
-                    } else {
+
+
+                    } else /*Otherwise */ {
                         // Collect file content
                         readFile(fileDescriptor, &responseToSend.body, &responseToSend.contentLength);
                         closeFile(fileDescriptor);
@@ -245,12 +252,16 @@ HTTPResponse buildResponse(char * rootDirectory, char * request){
                         goto send_request;
                     }
                 } else {
+
+                    // If the path is empty
                     responseToSend.code = RESPONSE_CLIENT_ERROR_BAD_REQUEST;
                     responseToSend.contentType = CONTENT_TYPE_TEXT_PLAIN;
                     responseToSend.body = "Bad Request";
                     goto send_request;
                 }
             default:
+
+                // If the method is not supported yet. If someone wants to implement it, they can fork the project and do it + make a pull request :D
                 responseToSend.code = RESPONSE_SERVER_ERROR_NOT_IMPLEMENTED;
                 responseToSend.contentType = CONTENT_TYPE_TEXT_PLAIN;
                 responseToSend.body = "Method isn't supported yet";
@@ -259,15 +270,19 @@ HTTPResponse buildResponse(char * rootDirectory, char * request){
 
         send_request:
 
+            // Always clean allocated memory
             if(convertedRequest.body                != NULL) free(convertedRequest.body);
             if(convertedRequest.command.path        != NULL) free(convertedRequest.command.path);
             if(convertedRequest.headers             != NULL) free(convertedRequest.headers);
+
             return responseToSend;
     }
 
 }
 
 char* responseToStr(HTTPResponse response) {
+
+    // Allocate memory for the response string
     char * responseStr = calloc(
             strlen(httpVersionToStr(HTTP1_1)) + // length of HTTP version
             1 + // space
@@ -323,6 +338,7 @@ char* responseToStr(HTTPResponse response) {
         strcat(responseStr, "\r\n");
     }
 
+    // Add the body if it exists
     ulong bodyLength = response.body != NULL ? strlen(response.body) + strlen("\r\n"): 0;
     responseStr = reallocarray(responseStr, strlen(responseStr) + bodyLength + (strlen("\r\n") * 3) + 1,sizeof(char));
     strcat(responseStr, "\r\n");

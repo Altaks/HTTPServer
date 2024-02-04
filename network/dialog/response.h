@@ -3,6 +3,9 @@
 
 #include "requests.h"
 
+/**
+ * Represents a HTTP response code
+ */
 typedef enum HTTPResponseCode HTTPResponseCode;
 enum HTTPResponseCode {
 
@@ -108,6 +111,9 @@ enum HTTPResponseCode {
 
 char* HTTPResponseCodeToStr(HTTPResponseCode code);
 
+/**
+ * Represents a MIME content type, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
+ */
 typedef enum MIMEContentType MIMEContentType;
 enum MIMEContentType {
     CONTENT_TYPE_UNKNOWN,
@@ -184,6 +190,9 @@ enum MIMEContentType {
     CONTENT_TYPE_MAX_LENGTH
 };
 
+/**
+ * Represents a HTTP response
+ */
 typedef struct HTTPResponse HTTPResponse;
 struct HTTPResponse {
     HTTPResponseCode code;
@@ -196,8 +205,19 @@ struct HTTPResponse {
     ssize_t contentLength;
 };
 
+/**
+ * Builds a HTTP response from a request and a content root directory
+ * @param rootDirectory the full path to the root directory
+ * @param request_txt the request to build the response from
+ * @return the built response
+ */
 HTTPResponse buildResponse(char * rootDirectory, char * request_txt);
 
+/**
+ * Converts a HTTP response to a string
+ * @param response the response to convert
+ * @return the string corresponding to the response
+ */
 char* responseToStr(HTTPResponse response);
 
 #endif

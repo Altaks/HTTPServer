@@ -1,6 +1,5 @@
 #include <string.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include "requests.h"
 #include "../../logging/logging.h"
 
@@ -71,6 +70,7 @@ HTTPCommand commandFromStr(char* str) {
     char * command_cpy = calloc(strlen(str) + 1, sizeof(char)); // Removing \r\n from the end of the string
     strncpy(command_cpy, str, strlen(str));
 
+    // Splitting the command using tokenization
     char * token = strtok(command_cpy, " ");
     int8_t token_index = 0;
 
@@ -86,6 +86,8 @@ HTTPCommand commandFromStr(char* str) {
             case 1:
                 // Path of the request
                 command.path = calloc(strlen(token) + 1, sizeof(char));
+
+                // If the path is just a slash, we consider it as a request to the index.html file.
                 if(strcmp("/", token) == 0){
                     strcpy(command.path, "/index.html");
                 } else {
@@ -110,67 +112,87 @@ HTTPCommand commandFromStr(char* str) {
 }
 
 HTTPHeader headerFromStr(char* str) {
+
+    if(strlen(str) == 0) {
+        return (HTTPHeader) {0};
+    }
+
+    // Creating empty header data
     HTTPHeader header = {0};
 
+    // Copying header to avoid modifying the original string
     char * phrase = calloc(strlen(str) + 1, sizeof(char));
     strcpy(phrase, str);
 
+    // Splitting the header using tokenization
     const char * delimiter = ": ";
     char * phrase_pos = phrase;
 
-    long prefix_len = strstr(phrase, delimiter) - phrase;
+    // Getting the prefix of the header
+    ulong prefix_len = strstr(phrase, delimiter) - phrase;
     char * prefix = calloc( prefix_len + 1, sizeof(char));
     strncpy(prefix, phrase, prefix_len);
     phrase_pos += prefix_len + strlen(delimiter);
 
     header.key = prefix;
 
-    long content_len = strlen(str) - prefix_len - strlen(delimiter);
+    // Getting the content of the header
+    ulong content_len = strlen(str) - prefix_len - strlen(delimiter);
     char * content = calloc( content_len + 1, sizeof(char));
     strncpy(content, phrase_pos, content_len);
 
     header.value = content;
 
+    // Freeing the memory allocated for the phrase
     free(phrase);
     return header;
 }
 
 HTTPRequest requestFromStr(char* str) {
+
+    // Allocating memory for the request copy
     char * req_cpy = malloc(strlen(str) + 1);
     strcpy(req_cpy, str);
     char * curr_req_pos = req_cpy;
 
+    // Determining the delimiter of the request
     const char * delimiter = (strstr(str, "\r\n\r\n") != NULL) ? "\r\n\r\n" : "\n\n";
 
+    // Determining the request head
     long req_head_size = strstr(curr_req_pos, delimiter) - curr_req_pos;
     char * req_head = malloc(sizeof(char) * req_head_size + 1);
     strncpy(req_head, curr_req_pos, req_head_size);
+
+    // Move ptr after the delimiter (to the next matching part of the string)
     curr_req_pos += (sizeof(char) * req_head_size) + strlen(delimiter);
 
     char * req_body = NULL;
 
-    // If request has a body
+    // If request has a body, determine it.
     if(strstr(curr_req_pos, delimiter)){
         long req_body_size = strstr(curr_req_pos, delimiter) - curr_req_pos;
         req_body = malloc(sizeof(char) * req_head_size + 1);
         strncpy(req_body, curr_req_pos, req_body_size);
-        curr_req_pos += (sizeof(char) * req_body_size) + strlen(delimiter); // TODO : Check if this is useful ?
-
         server_log(INFO, "Request body has been determined as %s", req_body);
     }
 
+    // Freeing the memory allocated for the request copy
     free(req_cpy);
 
+    // Determining the line delimiter inside the request head
     const char * line_delimiter = (strstr(req_head, "\r\n") != NULL) ? "\r\n" : "\n";
 
     // -------------------- REQUEST PROCESSING BEGIN -----------------------
 
+    // Creating empty request data
     HTTPRequest request = {0};
 
     // -------------------- REQ_COMMAND TREATMENT --------------------
 
+    // Placing a ptr at the beginning of the request head to move it.
     char * req_head_pos = req_head;
 
+    // Determining the command of the request
     long req_command_size = strstr(req_head_pos, line_delimiter) - req_head_pos;
     char * req_command = calloc(req_command_size + 1, sizeof(char));
     strncpy(req_command, req_head_pos, req_command_size);
@@ -178,41 +200,55 @@ HTTPRequest requestFromStr(char* str) {
     // Move ptr after the first line
     req_head_pos += req_command_size + strlen(line_delimiter);
 
+    // Determining the command of the request
     request.command = commandFromStr(req_command);
 
     server_log(INFO, "Request command determined as [method: %s, path: %s, version: %s]", requestTypeToStr(request.command.type), request.command.path,
                httpVersionToStr(request.command.version));
+
+    // Freeing the memory allocated for the command string
     free(req_command);
 
     // -------------------- REQ_HEAD TREATMENT --------------------
 
+    // Creating empty headers data
     HTTPHeader * headers = NULL;
     int headers_count = 0;
     int headers_allocated = 0;
 
+    // As long as there are headers, we determine them
     while(strstr(req_head_pos, line_delimiter) != NULL) {
+
+        // Determining the header and copying it to avoid modifying the original string
         long req_header_size = strstr(req_head_pos, line_delimiter) - req_head_pos;
-        char* req_header = malloc(sizeof(char) * req_header_size + 1);
-        memset(req_header, '\0', req_header_size + 1);
+        char* req_header = calloc( req_header_size + 1, sizeof(char));
         strncpy(req_header, req_head_pos, req_header_size);
         req_head_pos += req_header_size + strlen(line_delimiter);
 
+        // If the headers array is not allocated, we allocate it with a default length of 5.
+        // If it is allocated, we reallocate it with a bigger size.
         if(headers == NULL){
-            headers = malloc(sizeof(HTTPHeader) * 5);
+            headers = calloc( 5, sizeof(HTTPHeader));
             headers_allocated = 5;
         } else if(headers_allocated >= headers_count) {
-            headers = realloc(headers, sizeof(HTTPHeader) * (headers_count + 5));
+            headers = reallocarray(headers, headers_count + 5, sizeof(HTTPHeader));
             headers_allocated += 5;
         }
-        headers[headers_count++] = headerFromStr(req_header);
+
+        // We add the header to the headers array and increment the headers count.
+        if(strcmp("", req_header) != 0) headers[headers_count++] = headerFromStr(req_header);
+
+        // Freeing the memory allocated for the header string
         free(req_header);
     }
 
+    // We set the headers and the headers count to the request.
     request.headers = headers;
     request.headers_count = headers_count;
 
     // -------------------- REQ_BODY TREATMENT --------------------
 
+    // If the request has a body, we set it to the request.
     if(req_body != NULL){
         request.body = req_body;
         server_log(INFO, "Request body is %s", request.body);
