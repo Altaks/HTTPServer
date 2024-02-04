@@ -59,7 +59,7 @@ int map_get(struct hashmap* map, char* key);
  * @param key the key to remove
  * @return the value corresponding to the key
  */
-__attribute__((unused)) int map_rem(struct hashmap* map, char* key);
+__attribute__((unused)) void map_rem(struct hashmap* map, char* key);
 
 /**
  * Hash function for the hashmap
@@ -67,6 +67,6 @@ __attribute__((unused)) int map_rem(struct hashmap* map, char* key);
  * @param key the key to hash
  * @return the hash of the key
  */
-int djb2(struct hashmap* map, char* key);
+int djb2(struct hashmap* map, const char* key);
 
 #endif

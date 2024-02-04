@@ -48,7 +48,7 @@ int map_get(struct hashmap* map, char* key) {
     return map_ind->val;
 }
 
-__attribute__((unused)) int map_rem(struct hashmap* map, char* key) {
+__attribute__((unused)) void map_rem(struct hashmap* map, char* key) {
     struct map_item* map_ind = &map->data[djb2(map, key)];
     struct map_item* prev_map_ind;
     bool isBase = true;
@@ -76,7 +76,7 @@ __attribute__((unused)) int map_rem(struct hashmap* map, char* key) {
 
 }
 
-int djb2(struct hashmap* map, char* key) {
+int djb2(struct hashmap* map, const char* key) {
     int hash = 5381;
     int i = 0;
     while(key[i] != '\0') {

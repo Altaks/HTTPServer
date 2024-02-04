@@ -47,8 +47,8 @@ struct HTTPCommand {
  */
 typedef struct HTTPHeader HTTPHeader;
 struct HTTPHeader {
-    char * key;
-    char * value;
+    __attribute__((unused)) char * key;
+    __attribute__((unused)) char * value;
 };
 
 /**
@@ -59,7 +59,7 @@ struct HTTPRequest {
     HTTPCommand command;
 
     HTTPHeader * headers;
-    int headers_count;
+    __attribute__((unused)) int headers_count;
 
     char * body;
 };
