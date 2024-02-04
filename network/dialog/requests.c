@@ -86,7 +86,11 @@ HTTPCommand commandFromStr(char* str) {
             case 1:
                 // Path of the request
                 command.path = calloc(strlen(token) + 1, sizeof(char));
-                strcpy(command.path, token);
+                if(strcmp("/", token) == 0){
+                    strcpy(command.path, "/index.html");
+                } else {
+                    strcpy(command.path, token);
+                }
                 break;
             case 2:
                 // HTTP version of the request

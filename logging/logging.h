@@ -2,7 +2,6 @@
 #define LOGGING_H
 
 typedef enum LogLevel LogLevel;
-
 enum LogLevel {
     FATAL, ERROR, WARNING, INFO
 };

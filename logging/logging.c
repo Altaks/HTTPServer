@@ -14,20 +14,20 @@ void server_log(LogLevel logLevel, const char* message, ...) {
     time_t now = time(NULL);
     struct tm * time = localtime(&now);
 
-    char logLevelstr[8];
+    char logLevelstr[16];
 
     switch (logLevel) {
         case FATAL:
-            sprintf(logLevelstr, "[FATAL]");
+            sprintf(logLevelstr, "\x1b[1;160m[FATAL]");
             break;
         case ERROR:
-            sprintf(logLevelstr, "[ERROR]");
+            sprintf(logLevelstr, "\x1b[0;210m[ERROR]");
             break;
         case WARNING:
-            sprintf(logLevelstr, "[WARN] ");
+            sprintf(logLevelstr, "\x1b[0;215m[WARN] ");
             break;
         case INFO:
-            sprintf(logLevelstr, "[INFO] ");
+            sprintf(logLevelstr, "\x1b[0;252m[INFO] ");
             break;
     }
 
@@ -40,12 +40,12 @@ void server_log(LogLevel logLevel, const char* message, ...) {
         case ERROR:
             fprintf(stderr, "[%02d/%02d/%d %02d:%02d:%02d] %s | ", time->tm_mday, time->tm_mon + 1, time->tm_year + 1900, time->tm_hour, time->tm_min, time->tm_sec, logLevelstr);
             vfprintf(stderr, message, args);
-            fprintf(stderr, "\n");
+            fprintf(stderr, "\x1b[0m\n");
             break;
         default:
             printf("[%02d/%02d/%d %02d:%02d:%02d] %s | ", time->tm_mday, time->tm_mon + 1, time->tm_year + 1900, time->tm_hour, time->tm_min, time->tm_sec, logLevelstr);
             vprintf(message, args);
-            printf("\n");
+            printf("\x1b[0m\n");
             break;
     }
     va_end(args);

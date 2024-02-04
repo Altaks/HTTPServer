@@ -15,9 +15,7 @@ const int TCP_STACK = 5;
 
 char * rootDirectory = NULL;
 
-void startServer(int argc, char** argv);
-
-int main(int argc, char** argv) {
+[[noreturn]] int main(int argc, char** argv) {
     server_log(INFO, "Booting the server...");
     server_log(INFO, "Initializing MIME file types hash table...");
 
