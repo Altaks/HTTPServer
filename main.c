@@ -6,13 +6,13 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
+#include <dirent.h>
 
 #include "files/files.h"
 #include "logging/logging.h"
 #include "network/address.h"
 
 const int TCP_STACK = 5;
-
 char * rootDirectory = NULL;
 
 [[noreturn]] int main(int argc, char** argv) {
@@ -30,8 +30,23 @@ char * rootDirectory = NULL;
         exit(EXIT_FAILURE);
     }
 
-    short port = atoi(argv[1]);
-    rootDirectory = argv[2]; // TODO : Check for directory existence
+    ushort port = atoi(argv[1]);
+    if(!(1024 < port && port <= 65535)){
+        server_log(FATAL, "Server port range is invalid, should be in range ]1024 -> 65535]");
+        exit(EXIT_FAILURE);
+    }
+
+    DIR * dir = opendir(argv[2]);
+    if(dir){
+        rootDirectory = argv[2];
+        closedir(dir);
+    } else if(errno == ENOENT){
+        server_log(FATAL, "Content directory does not exist !");
+    } else if(errno == EACCES) {
+        server_log(FATAL, "Specified content folder isn't accessible due to permission configuration.");
+    } else {
+        server_log(FATAL, "Server content folder isn't accessible for some reason.");
+    }
 
     server_log(INFO, "Server launched on port %i and root directory %s", port, rootDirectory);
 
@@ -108,21 +123,29 @@ char * rootDirectory = NULL;
             }
         }
 
-        char * response = responseToStr(buildResponse(rootDirectory, request));
+        HTTPResponse httpResponse = buildResponse(rootDirectory, request);
+        char * responseStr = responseToStr(httpResponse);
 
-        if(response != NULL){
-            send(dialog_socket, response, strlen(response), 0);
+        if(responseStr != NULL){
+            send(dialog_socket, responseStr, strlen(responseStr), 0);
         } else {
+            // TODO : NYI
             server_log(ERROR, "Response is NULL ???");
         }
 
         close(dialog_socket);
 
+        // Freeing http response manual memory allocations
+        if(httpResponse.date            != NULL) free(httpResponse.date);
+        if(httpResponse.expires         != NULL) free(httpResponse.expires);
+        if(httpResponse.lastModified    != NULL) free(httpResponse.lastModified);
+        if(httpResponse.body            != NULL) free(httpResponse.body);
+
+        // Freeing response related strings manual memory allocations
         if(client_addr != NULL) free(client_addr);
         if(request     != NULL) free(request);
-        if(response    != NULL) free(response);
+        if(responseStr != NULL) free(responseStr);
 
         server_log(INFO, "Server connection %i with client on socket %i has been closed and resources have been freed", connection_id, sock);
     }
-    return 0;
 }

@@ -109,14 +109,6 @@ HTTPCommand commandFromStr(char* str) {
     return command;
 }
 
-
-char* headerToStr(HTTPHeader header) {
-    char * str = malloc(sizeof(char) * (strlen(header.key) + strlen(header.value) + 4));
-    sprintf(str, "%s: %s", header.key, header.value);
-    return str;
-}
-
-
 HTTPHeader headerFromStr(char* str) {
     HTTPHeader header = {0};
 
@@ -141,11 +133,6 @@ HTTPHeader headerFromStr(char* str) {
 
     free(phrase);
     return header;
-}
-
-
-char* requestToStr(HTTPRequest request) {
-    return "Not implemented yet";
 }
 
 HTTPRequest requestFromStr(char* str) {

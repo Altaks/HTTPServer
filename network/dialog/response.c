@@ -218,7 +218,7 @@ HTTPResponse buildResponse(char * rootDirectory, char * request){
             responseToSend.code = RESPONSE_CLIENT_ERROR_BAD_REQUEST;
             responseToSend.contentType = CONTENT_TYPE_TEXT_PLAIN;
             responseToSend.body = "Bad Request";
-            return responseToSend;
+            goto send_request;
         }
 
         // Analyse HTTP Command
@@ -232,7 +232,7 @@ HTTPResponse buildResponse(char * rootDirectory, char * request){
                         responseToSend.code = RESPONSE_CLIENT_ERROR_NOT_FOUND;
                         responseToSend.body = "Content not found";
                         responseToSend.contentType = CONTENT_TYPE_TEXT_PLAIN;
-                        return responseToSend;
+                        goto send_request;
                     } else {
                         // Collect file content
                         readFile(fileDescriptor, &responseToSend.body, &responseToSend.contentLength);
@@ -242,24 +242,27 @@ HTTPResponse buildResponse(char * rootDirectory, char * request){
                         // Detect content type
                         responseToSend.contentType = detectMimeContentTypes(convertedRequest.command.path);
                         responseToSend.code = RESPONSE_SUCCESS_OK;
-                        return responseToSend;
+                        goto send_request;
                     }
                 } else {
                     responseToSend.code = RESPONSE_CLIENT_ERROR_BAD_REQUEST;
                     responseToSend.contentType = CONTENT_TYPE_TEXT_PLAIN;
                     responseToSend.body = "Bad Request";
-                    return responseToSend;
+                    goto send_request;
                 }
-                break;
             default:
                 responseToSend.code = RESPONSE_SERVER_ERROR_NOT_IMPLEMENTED;
                 responseToSend.contentType = CONTENT_TYPE_TEXT_PLAIN;
                 responseToSend.body = "Method isn't supported yet";
-                return responseToSend;
+                goto send_request;
         }
 
-        // return response
-        return responseToSend;
+        send_request:
+
+            if(convertedRequest.body                != NULL) free(convertedRequest.body);
+            if(convertedRequest.command.path        != NULL) free(convertedRequest.command.path);
+            if(convertedRequest.headers             != NULL) free(convertedRequest.headers);
+            return responseToSend;
     }
 
 }

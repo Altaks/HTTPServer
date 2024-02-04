@@ -100,26 +100,11 @@ HTTPVersion httpVersionFromStr(char* str);
 HTTPCommand commandFromStr(char* str);
 
 /**
- * Converts a HTTP header to a string
- * @param header the HTTP header to convert
- * @return the string corresponding to the HTTP header
- */
-char* headerToStr(HTTPHeader header);
-
-/**
  * Converts a string to a HTTP header
  * @param str the string to convert
  * @return the HTTP header corresponding to the string
  */
 HTTPHeader headerFromStr(char* str);
-
-/**
- * Converts a HTTP request to a string
- * @param request the HTTP request to convert
- * @return the string corresponding to the HTTP request
- */
-char* requestToStr(HTTPRequest request);
-
 /**
  * Converts a string to a HTTP request
  * @param str the string to convert

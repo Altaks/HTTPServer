@@ -10,7 +10,7 @@
  * @param message corresponds to the message than is displayed
  * @param ... printf arguments
  */
-void server_log(LogLevel logLevel, const char* message, ...) {
+void server_log(LogLevel logLevel, const char * restrict message, ...) {
     time_t now = time(NULL);
     struct tm * time = localtime(&now);
 
